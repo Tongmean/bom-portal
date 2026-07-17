@@ -6,7 +6,7 @@ const useGridHighlight = (
   gridApi
 ) => {
   const location = useLocation();
-
+  // console.log("useGridHighlight gridApi", gridApi);
   useEffect(() => {
     if (!gridApi) return;
 

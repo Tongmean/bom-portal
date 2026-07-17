@@ -1,0 +1,183 @@
+const Service = require('../service/processOrderservice')
+const matService = require('../service/m_matService')
+const { update_log, create_log } = require('../utility/update_log') 
+const { leftJoin } = require('../utility/leftJoin') 
+const {createColumnDefs} = require('../utility/getColumn')
+const {pivotData} = require('../utility/pivotUltility')
+const dbconnect = require('../../../middleWare/Dbconnect');
+
+
+const getAllprocess_order = async (req, res) => {
+    try {
+        const process_routing = await Service.getAllprocessRouting()        
+        const process_routing_order = await Service.getAllprocessRoutingorder()
+        const mat = await matService.getAllmat() 
+        // console.log("process_routing", process_routing)
+        // console.log("process_routing_order", process_routing_order)
+        // console.log("mat", mat[0])       
+        const pivetProcess_routing_order = pivotData(process_routing_order,{
+            groupBy: ['process_routing_id'],
+            pivotColumnKey: 'process',
+            pivotValueKey: 'process_order'
+        }) 
+        // console.log("pivetProcess_routing_order",pivetProcess_routing_order)
+        const step1 = leftJoin(process_routing, mat, 'mat_id', 'mat_id')
+        const final = leftJoin(step1, pivetProcess_routing_order, 'process_routing_id', 'process_routing_id')
+        const newArray = final.map(({ 
+            width, height, thick, area, curve, 
+            min_thick, max_thick, cavity, weight, 
+            costperunit, file, id,mat_id, unit, ...rest 
+        }) => rest);
+        const columnDefs = createColumnDefs(newArray)
+        // console.log("newArray", newArray)
+        // console.log("columnDefs", columnDefs)
+        res.status(200).json({
+            success: true,
+            msg: 'ดึงข้อมูลทั้งหมดได้สำเร็จ',
+            data: newArray,
+            columnDefs: columnDefs
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+        success: false,
+        msg: 'มีปัญหาเกิดขึ้นระหว่างการดึงข้อมูล',
+        error: error.message
+        });
+    }
+};
+
+//single
+const getSingleprocess_order = async (req, res) => {
+    const id = req.params.id
+    try {
+        const process_routing = await Service.getSingleprocessRouting(id)        
+        const process_routing_order = await Service.getSinlgeprocessRoutingorderbyroutingid(id)
+        const process_routing_ColumnDefs = (() => {
+            const source = process_routing || [];
+            const cols = [...createColumnDefs(source)];
+        
+            if (cols[0]) cols[0] = { ...cols[0], hidden: true };
+            if (cols[1]) cols[1] = { ...cols[1], required: true, option: true };
+            // if (cols[5]) cols[5] = { ...cols[5], option: true, required: true };
+            // if (cols[6]) cols[6] = { ...cols[6], option: true, required: true };
+        
+            return cols;
+        })();
+        const process_routing_order_ColumnDefs = (() => {
+            const source = process_routing_order || [];
+            const cols = [...createColumnDefs(source)];
+        
+            if (cols[0]) cols[0] = { ...cols[0], hidden: true };
+            if (cols[1]) cols[1] = { ...cols[1], hidden: true };
+            if (cols[3]) cols[3] = { ...cols[3], option: true };
+        
+            return cols;
+        })();
+        // console.log("newArray", newArray)
+        // console.log("columnDefs", columnDefs)
+        res.status(200).json({
+            success: true,
+            msg: 'ดึงข้อมูลทั้งหมดได้สำเร็จ',
+            data: {
+                process_routing:process_routing,
+                process_routing_order: process_routing
+            },
+            columnDefs: {
+                process_routing_ColumnDefs:process_routing_ColumnDefs,
+                process_routing_order_ColumnDefs: process_routing_order_ColumnDefs
+            }
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+        success: false,
+        msg: 'มีปัญหาเกิดขึ้นระหว่างการดึงข้อมูล',
+        error: error.message
+        });
+    }
+};
+//post single
+const postSingleprocessController = async (req, res) => {
+    const payload = req.body
+    // console.log("payload", payload)
+    const user_id = req.user.id
+    // {
+    //     "header": {
+    //         "mat_id": 463,
+    //         "revision": "12",
+    //         "remark": "12"
+    //     },
+    //     "detail": [
+    //         {
+    //             "process_order": "1",
+    //             "process": "press"
+    //         }
+    //     ]
+    // }
+    
+
+    try {
+        await dbconnect.query('BEGIN')
+        //check Duplicate
+        const checkDuplicate = await Service.checkDuplicate(payload.header.mat_id)
+        if (checkDuplicate.length > 0) {
+            return res.status(400).json({
+                success: false,
+                data: checkDuplicate[0],
+                msg: `รหัส MAT: ${payload.header.mat_id} มีในฐานข้อมูลอยู่แล้ว กรุณาลองรหัสใหม่!`
+            });
+        }
+        //insert prospec
+        const headerResult = await Service.postSingleprocessRouting(payload.header)
+        //log create at
+        if (headerResult) {
+            await create_log("process_routing", headerResult[0].process_routing_id, user_id)
+            // await create_log()
+        }
+        //isert product spec detail
+        const insertItems = []
+        for(const i of payload.detail) {
+            const item = {
+                process_routing_id: headerResult[0].process_routing_id,
+                process_order: i.process_order,
+                process: i.process
+            }
+            const itemsResults = await detailService.postDetailenginnering(item)
+            // console.log("itemsResults", itemsResults[0])
+            // console.log("i", i)
+
+            insertItems.push(itemsResults[0].process)
+            await create_log("process_routing_order", itemsResults[0].process_routing_order_id, user_id)
+        }
+        await dbconnect.query('COMMIT');
+        res.status(200).json({
+            success: true,
+            msg: `save record successfull: ${payload.header.compact_no} }`,
+            // data: {
+            //     header:productspecResult,
+            //     items: insertItems
+            // }
+        });
+
+    } catch (error) {
+        await dbconnect.query('ROLLBACK');
+        console.error(error);
+        res.status(500).json({
+        success: false,
+        msg: 'มีปัญหาเกิดขึ้นระหว่างการดึงข้อมูล',
+        error: error.message
+        });
+    }
+};
+
+
+
+module.exports = {
+    getAllprocess_order,
+    getSingleprocess_order,
+    postSingleprocessController
+
+};

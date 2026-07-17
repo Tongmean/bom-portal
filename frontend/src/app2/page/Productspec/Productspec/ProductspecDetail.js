@@ -120,7 +120,7 @@ const ProductspecDetail = (props) => {
             <ExcelExportButton gridApi={gridApi} columnDefs={finalColumnDefs} selectedCount = {sellectrow.length} Tablename = "sd-packaging"/>
             <Tablecomponent
                 columnDefs={finalColumnDefs}
-                rowData={data}
+                rowData={filteredData}
                 onGridReady={onGridReady}
                 onSelectionChanged={onSelectionChanged}
             />

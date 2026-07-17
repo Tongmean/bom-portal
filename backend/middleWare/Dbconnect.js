@@ -9,20 +9,20 @@ const dbconnect = new Pool({
   // password: process.env.password,    // Your PostgreSQL password
   // port: process.env.port,                   // Default PostgreSQL port
 
-  user: 'postgres',       // Your PostgreSQL username
-  host: 'localhost',            // Database host (e.g., localhost)
-  database: 'bom',    // Your PostgreSQL database name
-  password: '15tongmean',    // Your PostgreSQL password
-  port: 5432,                   // Default PostgreSQL port
+  // user: 'postgres',       // Your PostgreSQL username
+  // host: 'localhost',            // Database host (e.g., localhost)
+  // database: 'Bom-Disc',    // Your PostgreSQL database name
+  // password: '15tongmean',    // Your PostgreSQL password
+  // port: 5432,                   // Default PostgreSQL port
 
   //   host: '192.168.4.200',            (Loptop Ip)
   //Vm Database
-  // user: 'postgres',       // Your PostgreSQL username
-  // host: '192.168.4.239',            // Database host (e.g., localhost)
-  // database: 'Bom',    // Your PostgreSQL database name
-  // // database: 'Bom-Disc-Datasheet-Update-02',    // Your PostgreSQL database name
-  // password: '230604',    // Your PostgreSQL password
-  // port: 5432, 
+  user: 'postgres',       // Your PostgreSQL username
+  host: '192.168.4.239',            // Database host (e.g., localhost)
+  database: 'Bom',    // Your PostgreSQL database name
+  // database: 'Bom-Disc-Datasheet-Update-02',    // Your PostgreSQL database name
+  password: '230604',    // Your PostgreSQL password
+  port: 5432, 
 
 });
 

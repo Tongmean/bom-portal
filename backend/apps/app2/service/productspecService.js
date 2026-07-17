@@ -1,4 +1,4 @@
-const dbconnect = require('../../../Middleware/Dbconnect');
+const dbconnect = require('../../../middleWare/Dbconnect');
 const getAllproductspec = async () => {
         const mysql =`
             SELECT 

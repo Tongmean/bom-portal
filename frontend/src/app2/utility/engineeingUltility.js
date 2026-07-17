@@ -32,6 +32,7 @@ export const pivotDrawningData = (
     grouped[groupKey][`${component}_thick_upper`] = formatValue(row.thick_upper);
     grouped[groupKey][`${component}_thick_lower`] = formatValue(row.thick_lower);
     grouped[groupKey][`${component}_curve`] = formatValue(row.curve);
+    grouped[groupKey][`${component}_area`] = formatValue(row.area);
   });
 
   return Object.values(grouped);

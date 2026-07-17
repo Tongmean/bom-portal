@@ -1,10 +1,14 @@
-const sdpackagingService = require('../service/sdPackagingservice')
+// getAllproductspec
 
 const dbconnect = require('../../../middleWare/Dbconnect');
+// const Service = require('../service/productspecService')
+const detailService = require('../service/engineeringDetailservice')
 //mat
-const getAllsdpackagingController = async (req, res) => {
+const getSingleengineeringDetailbyheader_idcontroller = async (req, res) => {
+    const drawing_header_id = Number(req.params.id)
+    // console.log("productspec_detail_id", productspec_detail_id)
     try {
-        const result = await sdpackagingService.getAllsdpackaging()        
+        const result = await detailService.getSingledetailEngineeringbyheader_id(drawing_header_id)  
         res.status(200).json({
             success: true,
             msg: 'ดึงข้อมูลทั้งหมดได้สำเร็จ',
@@ -22,8 +26,6 @@ const getAllsdpackagingController = async (req, res) => {
 };
 
 
-
 module.exports = {
-    getAllsdpackagingController
-
+    getSingleengineeringDetailbyheader_idcontroller
 };

@@ -62,8 +62,8 @@ const useFetch = (url) => {
 
       const user = JSON.parse(localStorage.getItem("user"));
       const token = user?.user?.token;
-      console.log("token",token)
-      console.log("user",user?.user)
+      // console.log("token",token)
+      // console.log("user",user?.user)
 
       const response = await fetch(url, {
         method: "GET",

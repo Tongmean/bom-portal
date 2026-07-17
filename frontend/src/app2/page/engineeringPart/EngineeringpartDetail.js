@@ -3,6 +3,9 @@ import Tablecomponent from '../../component/Talecomponent';
 import ExcelExportButton from '../../component/ExcelExportButton';
 import { Button, Space, message } from "antd";
 import FilterForm from '../../component/FilterForm';
+import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import useGridHighlight from "../../hook/useGridHighlight";
 import {
     filterData,
     generateFilterOptions
@@ -36,11 +39,17 @@ const FILTER_FIELDS = [
 ];
 
 const EngineeringpartDetail = (props) => {
+    
+
     const [gridApi, setGridApi] = useState(null);
     const [sellectrow, setSelectedRow] = useState([]);
     const { data, columnDefs } = props;
     const [filters, setFilters] = useState({});
-
+    const navigate = useNavigate();
+    const location = useLocation();
+    useGridHighlight(gridApi);
+    // console.log("useGridHighlight(gridApi) data", useGridHighlight(gridApi));    
+    // console.log("gridApi", (gridApi));    
     const finalColumnDefs = useMemo(() => {
         const cols = [...columnDefs]; // copy ก่อน ไม่แก้ของเดิม
         cols[0] = { ...cols[0], checkboxSelection: true, headerName: "No" };
@@ -49,13 +58,16 @@ const EngineeringpartDetail = (props) => {
             headerName: 'Actions',
             field: 'actions',
             pinned: 'right',
-            cellRenderer: () => (
+            cellRenderer: (params) => (
                 <Space>
                     <Button size="small" type="primary">D : -</Button>
                     <Button
                         size="small"
                         type="primary"
                         style={{ backgroundColor: '#fcb830', borderColor: '#efbb54' }}
+                        onClick={()=>{
+                            navigate(`/app2/engineering/drawing/updateSingle/${params.data.drawing_header_id}`);
+                        }}
                     >
                         Edit
                     </Button>
@@ -64,7 +76,7 @@ const EngineeringpartDetail = (props) => {
             ),
         });
         return cols;
-    }, []); // [] = คำนวณครั้งเดียวตอน mount
+    }, [columnDefs, navigate]); // [] = คำนวณครั้งเดียวตอน mount
 
 
     const options = useMemo(() => {
@@ -107,6 +119,8 @@ const EngineeringpartDetail = (props) => {
                     size="small"
                     type="primary"
                     style={{ backgroundColor: '#fcb830', borderColor: '#efbb54' }}
+                    onClick= {()=> navigate("/app2/engineering/drawing/postSingle")}
+
                 >
                     เพิ่มรายการ
                 </Button>

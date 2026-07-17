@@ -41,13 +41,25 @@ const getAllm_documentStatus= async () => {
         return result.rows
 }
 
-
+const getOptioncomponent = async () => {
+    const mysql =`
+    SELECT DISTINCT
+        compoent AS component,
+        compoent_label AS component_label,
+        unit
+    FROM "blCpi".m_compoent_header_option
+    WHERE unit IS NOT NULL
+    `
+const result = await dbconnect.query(mysql);
+return result.rows
+}
 module.exports = {
     getAllm_channel,
     getAllm_status,
     getAllm_statusCheck,
     getAllm_componentHeader,
-    getAllm_documentStatus
+    getAllm_documentStatus,
+    getOptioncomponent
 
 
 };

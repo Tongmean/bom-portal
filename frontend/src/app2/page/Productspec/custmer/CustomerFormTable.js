@@ -46,43 +46,6 @@ const CustomerFormTable = ({
     setDataSource(newData);
   };
 
-  // const tableColumns = columns.map(col => ({
-  //   title: col.headerName,
-  //   dataIndex: col.field,
-  //   key: col.field,
-  //    // กำหนด width เฉพาะ entity_id
-  //   width: col.field === "entity_id" ? 250 : undefined,
-  //   render: (_, record, index) => {
-
-  //     if (col.field === "entity_id") {
-  //       return (
-  //         <Select
-  //           style={{ width: "100%" }}
-  //           value={record.entity_id}
-  //           placeholder="Select Entity"
-  //           onChange={(value) =>
-  //             handleChange(index, "entity_id", value)
-  //           }
-  //           options={entityOptions}
-  //         />
-  //       );
-  //     }
-
-  //     return (
-  //       <Input
-  //         value={record[col.field]}
-  //         onChange={(e) =>
-  //           handleChange(
-  //             index,
-  //             col.field,
-  //             e.target.value
-  //           )
-  //         }
-  //       />
-  //     );
-  //   }
-  // }));
-
   const tableColumns = columns.map(col => ({
   title: col.headerName,
   dataIndex: col.field,

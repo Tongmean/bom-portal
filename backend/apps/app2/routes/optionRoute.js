@@ -8,6 +8,7 @@ router.get('/m_status', Controller.getAllm_status);
 router.get('/m_statusCheck', Controller.getAllm_statusCheck);
 router.get('/m_componentHeader', Controller.getAllm_componentHeader);
 router.get('/m_documentStatus', Controller.getAllm_documentStatus);
+router.get('/m_component', Controller.getOptioncomponentController);
 
 
 module.exports = router;

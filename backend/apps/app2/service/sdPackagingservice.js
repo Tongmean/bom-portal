@@ -30,6 +30,98 @@ const getAllsdpackaging = async () => {
         const result = await dbconnect.query(mysql);
         return result.rows
 }
+
+
+const getSingleheader = async (payload) => {
+    // const {drawing_header_id} = payload;
+    const mysql =`
+    SELECT * FROM "blCpi".sdpackaging_header
+    WHERE sdpackaging_header_id = $1 
+
+    `
+    const result = await dbconnect.query(mysql, [payload]);
+    return result.rows
+}
+const checkDuplicateheader = async (payload) => {
+    // const {drawing_header_id} = payload;
+    const mysql =`
+    SELECT * FROM "blCpi".sdpackaging_header
+    WHERE sdpackaing_code = $1 
+
+    `
+    const result = await dbconnect.query(mysql, [payload]);
+    return result.rows
+}
+const postHeader = async (payload) => {
+// console.log("payload", payload)
+    const { sdpackaing_code, revision, remark, check_status } = payload;
+    const mysql = `
+        INSERT INTO "blCpi".sdpackaging_header(
+            sdpackaing_code, revision, remark, check_status
+        ) VALUES ($1, $2, $3, $4)
+        RETURNING *;
+    `;
+
+const values = [sdpackaing_code, revision, remark, check_status];
+const result = await dbconnect.query(mysql, values);
+
+return result.rows
+}
+const putHeader = async (payload) => {
+    const { 
+        sdpackaging_header_id, // The new ID if you are changing it, otherwise same as targetId
+        sdpackaing_code, 
+        revision, 
+        remark, 
+        check_status 
+      } = payload;
+
+        const mysql = `
+            UPDATE "blCpi".sdpackaging_header
+            SET 
+                sdpackaing_code = $1, 
+                revision = $2, 
+                remark = $3, 
+                check_status = $4
+            WHERE sdpackaging_header_id = $5
+            RETURNING *;
+        `;
+
+        const values = [
+            // sdpackaging_header_id, 
+            sdpackaing_code, 
+            revision, 
+            remark, 
+            check_status, 
+            sdpackaging_header_id
+        ];
+        const result = await dbconnect.query(mysql, values);
+        return result.rows
+}
+const deleteHeader = async (payload) => {
+const { 
+    sdpackaging_header_id
+} = payload;
+
+
+const mysql = `
+    DELETE FROM "blCpi".sdpackaging_header
+    WHERE sdpackaging_header_id = $1
+    RETURNING *;
+`;
+
+const values = [
+    sdpackaging_header_id // Maps to $11 in the WHERE clause
+];
+const result = await dbconnect.query(mysql, values);
+return result.rows
+}
+
 module.exports = {
-    getAllsdpackaging
+    getAllsdpackaging,
+    getSingleheader,
+    postHeader,
+    putHeader,
+    deleteHeader,
+    checkDuplicateheader
 };

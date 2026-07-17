@@ -26,7 +26,7 @@ const deleteArraycustomer = async (customer_id) => {
         const mysql =`
             DELETE FROM "blCpi".m_customer
             WHERE customer_id =$1
-            RETURNING customer_id
+            RETURNING
         `
         const result = await dbconnect.query(mysql, [customer_id]);
         return result.rows

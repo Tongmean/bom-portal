@@ -6,6 +6,7 @@ import { baseURL } from "../../../../utility/apiClient";
 import { createColumnDefs } from "../../../utility/ObjectArrayUltility";
 import ProductspecForm from "./ProductSpecForm";
 import { Button, Space, message } from "antd";
+import Form from "../../../component/Form";
 
 const PostSingleproductspec = () => {
   const navigate = useNavigate();
@@ -136,8 +137,9 @@ const PostSingleproductspec = () => {
   if (error) return <div>Error loading form data</div>;
 
   return (
-    <ProductspecForm
+    <Form
       mode="create"
+      tableName="product-specification"
       headerColumn={headerColumn}
       detailColumn={detailColumn}
       initialHeader={{}}
