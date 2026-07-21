@@ -6,6 +6,7 @@ const router = express.Router();
 router.get('/', Controller.getAllprocess_order);
 router.get('/:id', Controller.getSingleprocess_order);
 router.post('/postSingle', Controller.postSingleprocessController);
+router.post('/putSingle', Controller.putSingleprocessController);
 
 
 

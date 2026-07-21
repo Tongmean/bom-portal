@@ -3,7 +3,7 @@ const dbconnect = require('../../../Middleware/Dbconnect');
 const getAllprocessRouting = async () => {
         const mysql =`
                 SELECT * FROM "blCpi".process_routing
-                ORDER BY process_routing_id ASC 
+                ORDER BY process_routing_id DESC 
         
         `
         const result = await dbconnect.query(mysql);
@@ -95,6 +95,15 @@ const getSinlgeprocessRoutingorderbyroutingid = async (payload) => {
         const result = await dbconnect.query(mysql, [payload]);
         return result.rows
 }
+const getSinlgeprocessRoutingorder = async (payload) => {
+        const mysql =`
+                SELECT * FROM "blCpi".process_routing_order
+                WHERE process_routing_order_id = $1
+        
+        `
+        const result = await dbconnect.query(mysql, [payload]);
+        return result.rows
+}
 const postSingleProcessRoutingOrder = async (payload) => {
         const sql = `
             INSERT INTO "blCpi".process_routing_order (
@@ -160,5 +169,6 @@ module.exports = {
     putProcessRoutingOrder,
     deleteProcessRouting,
     deleteProcessRoutingOrder,
-    checkDuplicate
+    checkDuplicate,
+    getSinlgeprocessRoutingorder
 };

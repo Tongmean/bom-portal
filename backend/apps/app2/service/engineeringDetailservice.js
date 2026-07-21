@@ -31,13 +31,14 @@ const postDetailenginnering = async (payload) => {
         thick_upper,
         thick_lower,
         curve,
-        area
+        area,
+        hole
      } = payload;
     const mysql = `
         INSERT INTO "blCpi".drawing_detail(
-            component_header, mat_id, id, quantity, height, width, thick_upper, thick_lower, curve, area
+            component_header, mat_id, id, quantity, height, width, thick_upper, thick_lower, curve, area, hole
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         RETURNING *;
     `;
 
@@ -51,7 +52,8 @@ const postDetailenginnering = async (payload) => {
         thick_upper || null,
         thick_lower || null,
         curve || null,
-        area || null
+        area || null,
+        hole || null
     ];
     const result = await dbconnect.query(mysql, values);
     return result.rows
@@ -69,7 +71,8 @@ const putDetailenginnering = async (payload) => {
         thick_upper,
         thick_lower,
         curve,
-        area
+        area,
+        hole
     
     } = payload;
 
@@ -87,8 +90,9 @@ const putDetailenginnering = async (payload) => {
             thick_upper = $8, 
             thick_lower = $9, 
             curve = $10,
-            area = $11
-        WHERE drawing_detail_id = $12
+            area = $11,
+            hole = $12
+        WHERE drawing_detail_id = $13
         RETURNING *;
     `;
 

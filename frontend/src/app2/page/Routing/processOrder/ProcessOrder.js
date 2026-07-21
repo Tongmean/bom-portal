@@ -39,7 +39,7 @@ const ProcessOrder = () => {
         `${baseURL}/app2/process`,
         
     );
-    console.log("data", data)
+    // console.log("data", data)
     const percent = useFakeLoading(loading);
 
     const finalColumnDefs = useMemo(() => {
@@ -63,7 +63,7 @@ const ProcessOrder = () => {
                         style={{ backgroundColor: '#fcb830', borderColor: '#efbb54' }}
                         onClick={() => {
                             // MATCHED WITH JSON: Changed foam_header_id to certificate_id
-                            navigate(`/app2/certificate/putSingle/${params.data.certificate_id}`);
+                            navigate(`/app2/process/routing-order/putSingle/${params.data.process_routing_id}`);
                         }}
                     >
                         Edit

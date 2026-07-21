@@ -26,6 +26,7 @@ import PostSingleCertificate from "./page/Certificate/PostSingleCertificate";
 import PutSingleCertificate from "./page/Certificate/PutSingleCertificate";
 import ProcessOrder from "./page/Routing/processOrder/ProcessOrder";
 import PostSingleProcessOrder from "./page/Routing/processOrder/PostSingleProcessOrder";
+import PutSingleProcessOrder from "./page/Routing/processOrder/PustSingleProcessOrder";
 export const app2Routes = [
   {
     path: "/app2",
@@ -186,6 +187,12 @@ export const app2Routes = [
         path: "process/routing-order/postSingle",
         element: (
           < PostSingleProcessOrder/>
+        )
+      },
+      {
+        path: "process/routing-order/putSingle/:id",
+        element: (
+          < PutSingleProcessOrder/>
         )
       },
     ]
