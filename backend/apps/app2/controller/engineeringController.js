@@ -173,6 +173,7 @@ const UpdateSingleEngineering = async (req, res) => {
     //         }
     //     ]
     // }
+    console.log("req.body", req.body)
     try {
         //1. put header
         await dbconnect.query('BEGIN')
@@ -211,7 +212,7 @@ const UpdateSingleEngineering = async (req, res) => {
         for (const item of detail){
             const i = {
                 drawing_detail_id: item.drawing_detail_id,
-                drawing_header_id: headerResult[0].drawing_header_id,
+                drawing_header_id: item.drawing_header_id,
                 component_header: item.component_header,
                 mat_id: item.mat_id,
                 id: item.id,

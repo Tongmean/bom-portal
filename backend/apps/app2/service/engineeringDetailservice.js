@@ -108,6 +108,7 @@ const putDetailenginnering = async (payload) => {
         thick_lower,
         curve,
         area,
+        hole,
         drawing_detail_id // Maps to $11 in the WHERE clause
     ];
     const result = await dbconnect.query(mysql, values);
@@ -134,7 +135,7 @@ const deleteDetailenginnering = async (payload) => {
     return result.rows
 }
 
-
+///file
 module.exports = {
     postDetailenginnering,
     putDetailenginnering,

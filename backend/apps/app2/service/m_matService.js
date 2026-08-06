@@ -17,43 +17,47 @@ const checkDuplicate= async (payload) => {
 }
 const getAllmat = async () => {
         const mysql =`
-            SELECT 
-                mm.mat_id,
-                mm.erp,
-                mm.name,
-                mm.id,
-                mcho.component_label AS "component",
-                mcho.unit,
-                md.width,
-                md.height,
-                md.thick,
-                md.area,
-                md.curve,
-                md.min_thick,
-                md.max_thick,
-                md.cavity,
-                mu.weight,
-                mu.costperunit,
-                mf.file_name AS file
-            FROM "blCpi".m_mat mm
-            LEFT JOIN "blCpi".m_mat_cat mc
-                ON mm.mat_id = mc.mat_id
-            LEFT JOIN "blCpi".m_mat_unit mu
-                ON mm.mat_id = mu.mat_id
-            LEFT JOIN "blCpi".m_mat_file mf
-                ON mm.mat_id = mf.mat_id
-            LEFT JOIN "blCpi".m_mat_dimension md
-                ON mm.mat_id = md.mat_id
-            LEFT JOIN (
-                SELECT DISTINCT
-                    compoent AS component,
-                    compoent_label AS component_label,
-                    unit
-                FROM "blCpi".m_compoent_header_option
-                WHERE unit IS NOT NULL
-            ) mcho
-                ON mc.mat_cat = mcho.component
-            ORDER BY mm.mat_id DESC;
+        SELECT 
+            mm.mat_id,
+            mm.erp,
+            mm.name,
+            mm.id,
+            sc.label AS status_check,
+            mcho.component_label AS "component",
+            mcho.unit,
+            md.width,
+            md.height,
+            md.thick,
+            md.area,
+            md.curve,
+            md.min_thick,
+            md.max_thick,
+            md.cavity,
+            md.outer_dia,
+            mu.weight,
+            mu.costperunit,
+            mf.file_name AS file
+        FROM "blCpi".m_mat mm
+        LEFT JOIN "blCpi".m_mat_cat mc
+            ON mm.mat_id = mc.mat_id
+        LEFT JOIN "blCpi".m_mat_unit mu
+            ON mm.mat_id = mu.mat_id
+        LEFT JOIN "blCpi".m_mat_file mf
+            ON mm.mat_id = mf.mat_id
+        LEFT JOIN "blCpi".m_mat_dimension md
+            ON mm.mat_id = md.mat_id
+        LEFT JOIN "blCpi".m_status_check sc
+            ON sc.status_check_id = mm.status_check_id
+        LEFT JOIN (
+            SELECT DISTINCT
+                compoent AS component,
+                compoent_label AS component_label,
+                unit
+            FROM "blCpi".m_compoent_header_option
+            WHERE unit IS NOT NULL
+        ) mcho
+            ON mc.mat_cat = mcho.component
+        ORDER BY mm.mat_id DESC;
         `
     const result = await dbconnect.query(mysql);
     return result.rows
@@ -76,8 +80,8 @@ const postMat = async (payload) => {
     
     const mysql = `
         INSERT INTO "blCpi".m_mat(
-            erp, name, id)
-            VALUES ($1, $2, $3)
+            erp, name, id , status_check_id)
+            VALUES ($1, $2, $3, $4)
         RETURNING *;
     `;
 
@@ -86,7 +90,7 @@ const postMat = async (payload) => {
     const safeName = typeof payload.name === 'string' ? payload.name.trim() : payload.name;
     const safeId = typeof payload.id === 'string' ? payload.id.trim() : payload.id;
 
-    const result = await dbconnect.query(mysql, [safeErp, safeName, safeId]);
+    const result = await dbconnect.query(mysql, [safeErp, safeName, safeId, payload.status_check_id]);
     
     return result.rows;
 }
@@ -94,11 +98,11 @@ const postMat = async (payload) => {
 const putMat = async (payload) => {
         const mysql =`
         UPDATE "blCpi".m_mat
-        SET erp=$1, name=$2, id=$3
-        WHERE mat_id= $4
+        SET erp=$1, name=$2, id=$3, status_check_id=$4
+        WHERE mat_id= $5
         RETURNING *;
         `
-    const result = await dbconnect.query(mysql, [payload.erp, payload.name, payload.id, payload.mat_id]);
+    const result = await dbconnect.query(mysql, [payload.erp, payload.name, payload.id,payload.status_check_id, payload.mat_id]);
     return result.rows
 }
 const deleteMat = async (payload) => {

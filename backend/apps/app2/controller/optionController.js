@@ -110,15 +110,73 @@ const getOptioncomponentController = async (req, res) => {
         });
     }
 };
+const getOptionroutingOrderController = async (req, res) => {
+    try {
+        const result = await Service.getOptionroutingOrder()        
+        res.status(200).json({
+            success: true,
+            msg: 'ดึงข้อมูลทั้งหมดได้สำเร็จ',
+            data: result
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+        success: false,
+        msg: 'มีปัญหาเกิดขึ้นระหว่างการดึงข้อมูล',
+        error: error.message
+        });
+    }
+};
+const getOptionheaderSpeccomponentController = async (req, res) => {
+    try {
+        const result = await Service.getOptionheaderSpeccomponent()        
+        res.status(200).json({
+            success: true,
+            msg: 'ดึงข้อมูลทั้งหมดได้สำเร็จ',
+            data: result
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+        success: false,
+        msg: 'มีปัญหาเกิดขึ้นระหว่างการดึงข้อมูล',
+        error: error.message
+        });
+    }
+};
+const getOptionheaderSpeccomponentOptionController = async (req, res) => {
+    try {
+        const result = await Service.getOptionheaderSpeccomponentOption()        
+        res.status(200).json({
+            success: true,
+            msg: 'ดึงข้อมูลทั้งหมดได้สำเร็จ',
+            data: result
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+        success: false,
+        msg: 'มีปัญหาเกิดขึ้นระหว่างการดึงข้อมูล',
+        error: error.message
+        });
+    }
+};
 
 
 
 module.exports = {
-        getAllm_channel,
+    getAllm_channel,
     getAllm_status,
     getAllm_statusCheck,
     getAllm_componentHeader,
     getAllm_documentStatus,
-    getOptioncomponentController
+    getOptioncomponentController,
+    getOptionroutingOrderController,
+
+    getOptionheaderSpeccomponentController,
+    getOptionheaderSpeccomponentOptionController
 
 };

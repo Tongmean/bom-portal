@@ -21,16 +21,41 @@ const pivotData = (data, { groupBy, pivotColumnKey, pivotValueKey }) => {
     return Object.values(grouped);
 };
 
-module.exports = {
-    pivotData
+const pivotERPData = (data, groupFields) => {
+  const grouped = {};
+
+  const formatValue = (value) => {
+    return value === null || value === undefined || value === "" 
+      ? "-" 
+      : value;
+  };
+
+  data.forEach((row) => {
+    const groupKey = groupFields.map((f) => row[f]).join("|");
+
+    if (!grouped[groupKey]) {
+      grouped[groupKey] = {};
+
+      groupFields.forEach((field) => {
+        grouped[groupKey][field] = formatValue(row[field]);
+      });
+    }
+
+    const component = row.component;
+
+    // Guard clause in case row.component is missing
+    if (component) {
+      grouped[groupKey][`${component}_erp`] = formatValue(row.erp);
+      grouped[groupKey][`${component}_name`] = formatValue(row.name);
+      grouped[groupKey][`${component}_quantity`] = formatValue(row.quantity);
+    }
+  });
+
+  return Object.values(grouped);
 };
 
-// /**
-//  * Generically pivots an array of objects.
-//  * * @param {Array} data - The flat array of data.
-//  * @param {Object} config - Configuration for the pivot.
-//  * @param {Array<string>} config.groupBy - The keys to group by.
-//  * @param {string} config.pivotColumnKey - The key whose value becomes the new column name.
-//  * @param {string} config.pivotValueKey - The key whose value is assigned to the new column.
-//  * @returns {Array} - The pivoted array of objects.
-//  */
+module.exports = {
+    pivotData,
+    pivotERPData
+};
+

@@ -43,15 +43,46 @@ const getAllm_documentStatus= async () => {
 
 const getOptioncomponent = async () => {
     const mysql =`
-    SELECT DISTINCT
-        compoent AS component,
-        compoent_label AS component_label,
-        unit
-    FROM "blCpi".m_compoent_header_option
-    WHERE unit IS NOT NULL
-    `
-const result = await dbconnect.query(mysql);
-return result.rows
+        SELECT DISTINCT
+            compoent AS component,
+            compoent_label AS component_label,
+            unit
+        FROM "blCpi".m_compoent_header_option
+        WHERE unit IS NOT NULL
+        `
+    const result = await dbconnect.query(mysql);
+    return result.rows
+}
+const getOptionroutingOrder = async () => {
+    const mysql =`
+    SELECT * 
+        FROM "blCpi".process_routing_order pro
+        LEFT JOIN "blCpi".process_routing pr
+            ON pr.process_routing_id = pro.process_routing_id
+        LEFT JOIN "blCpi".m_mat mat
+            ON pr.mat_id = mat.mat_id
+        LEFT JOIN "blCpi".m_compoent_header_option cho
+            ON cho.compoent_header_option_id = pro.process
+        ORDER BY process_routing_order_id ASC 
+        `
+    const result = await dbconnect.query(mysql);
+    return result.rows
+}
+const getOptionheaderSpeccomponentOption = async () => {
+    const mysql =`
+        SELECT * FROM "blCpi".header_spec_component_option
+        ORDER BY header_spec_component_option_id ASC 
+        `
+    const result = await dbconnect.query(mysql);
+    return result.rows
+}
+const getOptionheaderSpeccomponent = async () => {
+    const mysql =`
+        SELECT * FROM "blCpi".header_spec_component
+        ORDER BY header_spec_component_id ASC 
+        `
+    const result = await dbconnect.query(mysql);
+    return result.rows
 }
 module.exports = {
     getAllm_channel,
@@ -59,7 +90,10 @@ module.exports = {
     getAllm_statusCheck,
     getAllm_componentHeader,
     getAllm_documentStatus,
-    getOptioncomponent
+    getOptioncomponent,
+    getOptionroutingOrder,
+    getOptionheaderSpeccomponentOption,
+    getOptionheaderSpeccomponent
 
 
 };

@@ -28,6 +28,7 @@ const PutSinglemat = () => {
       mat_file: `${baseURL}/app2/m_mat/mat/file/1`,
       mat_unit: `${baseURL}/app2/m_mat/mat/unit/101`,
       mat_dimension: `${baseURL}/app2/m_mat/mat/dimension/1`,
+      statusCheckOption: `${baseURL}/app2/option/m_statusCheck`,
     }),
     []
   );
@@ -40,6 +41,8 @@ const PutSinglemat = () => {
 
     if (cols[0]) cols[0] = { ...cols[0], hidden: true };
     if (cols[1]) cols[1] = { ...cols[1], required: true, type: "text" };
+    if (cols[4]) cols[4] = { ...cols[4],headerName:"status_check", required: true,option: true, type: 'number'};
+
 
     return cols;
   }, [data?.mat?.data]);
@@ -100,6 +103,11 @@ const PutSinglemat = () => {
           value: `${item.component}`,
           label: `${item.component_label} - ${item.unit}`,
         })) || [],
+      status_check_id:
+        data?.statusCheckOption?.data?.map((item) => ({
+          value: item.status_check_id,
+          label: item.label,
+      })) || [],
     }),
     [data]
   );

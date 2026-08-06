@@ -50,21 +50,21 @@ const getSinglematDimension = async (payload) => {
 const postMatdimension= async (payload) => {
     const mysql =`
     INSERT INTO "blCpi".m_mat_dimension(
-        mat_id, height, width, thick, curve, area, min_thick, max_thick, cavity)
-        VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9)
+        mat_id, height, width, thick, curve, area, min_thick, max_thick, cavity, outer_dia)
+        VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING *
     `
-    const result = await dbconnect.query(mysql, [payload.mat_id, payload.height, payload.width, payload.thick, payload.curve, payload.area, payload.min_thick, payload.max_thick, payload.cavity]);
+    const result = await dbconnect.query(mysql, [payload.mat_id, payload.height, payload.width, payload.thick, payload.curve, payload.area, payload.min_thick, payload.max_thick, payload.cavity, payload.outer_dia]);
     return result.rows
 }
 const putMatdimension = async (payload) => {
     const mysql =`
     UPDATE "blCpi".m_mat_dimension
-	SET height=$1, width=$2, thick=$3, curve=$4, area=$5, min_thick = $6, max_thick = $7, cavity = $8
-    WHERE mat_id= $9
+	SET height=$1, width=$2, thick=$3, curve=$4, area=$5, min_thick = $6, max_thick = $7, cavity = $8, outer_dia = $9
+    WHERE mat_id= $10
     RETURNING *
     `
-    const result = await dbconnect.query(mysql, [payload.height, payload.width, payload.thick, payload.curve, payload.area,payload.min_thick, payload.max_thick, payload.cavity, payload.mat_id]);
+    const result = await dbconnect.query(mysql, [payload.height, payload.width, payload.thick, payload.curve, payload.area,payload.min_thick, payload.max_thick, payload.cavity,payload.outer_dia, payload.mat_id]);
     return result.rows
 }
 const deleteMatDimension = async (payload) => {

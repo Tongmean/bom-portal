@@ -26,11 +26,12 @@ const getAllmatController = async (req, res) => {
 };
 const getSinglematController = async (req, res) => {
     try {
-        const result = await Service.getSinglemat(req.params.id)        
+        const result = await Service.getSinglemat(req.params.id)    
+        const mappedResult = result.map(item => ({mat_id:item.mat_id,erp: item.erp, name: item.name, id: item.id, mat_id: item.mat_id, status_check_id: Number(item.status_check_id)}));    
         res.status(200).json({
             success: true,
             msg: 'ดึงข้อมูลทั้งหมดได้สำเร็จ',
-            data: result
+            data: mappedResult
         });
 
     } catch (error) {
@@ -194,9 +195,9 @@ const postSingleheaderController = async (req, res) => {
     };
     const file = req.file;
 
-    console.log("payload", payload);
-    // console.log("JSON.parse(payload)", JSON.parse(payload));
-    console.log("file", file);
+    // console.log("payload", payload);
+    // // console.log("JSON.parse(payload)", JSON.parse(payload));
+    // console.log("file", file);
 
     try {
         await dbconnect.query("BEGIN");
@@ -292,21 +293,59 @@ const postSingleheaderController = async (req, res) => {
             Array.isArray(payload.mat_dimension) &&
             payload.mat_dimension.length > 0
         ) {
+            // for (const item of payload.mat_dimension) {
+            //     const result =
+            //         await detailService.postMatdimension({
+            //             mat_id,
+            //             height: item.height,
+            //             width: item.width,
+            //             thick: item.thick,
+            //             curve: item.curve,
+            //             area: item.area,
+            //             min_thick: item.min_thick,
+            //             max_thick: item.max_thick,
+            //             cavity: item.cavity,
+            //             outer_dia: item.outer_dia
+
+            //         });
+
+            //     await create_log(
+            //         "m_mat_dimension",
+            //         result[0].mat_id,
+            //         user_id
+            //     );
+            // }
             for (const item of payload.mat_dimension) {
-                const result =
-                    await detailService.postMatdimension({
-                        mat_id,
-                        height: item.height,
-                        width: item.width,
-                        thick: item.thick,
-                        curve: item.curve,
-                        area: item.area,
-                        min_thick: item.min_thick,
-                        max_thick: item.max_thick,
-                        cavity: item.cavity
 
-                    });
-
+                const hasData = [
+                    item.height,
+                    item.width,
+                    item.thick,
+                    item.curve,
+                    item.area,
+                    item.min_thick,
+                    item.max_thick,
+                    item.cavity,
+                    item.outer_dia
+                ].some(v => v !== null && v !== undefined && String(v).trim() !== "");
+            
+                if (!hasData) {
+                    continue;
+                }
+            
+                const result = await detailService.postMatdimension({
+                    mat_id,
+                    height: item.height,
+                    width: item.width,
+                    thick: item.thick,
+                    curve: item.curve,
+                    area: item.area,
+                    min_thick: item.min_thick,
+                    max_thick: item.max_thick,
+                    cavity: item.cavity,
+                    outer_dia: item.outer_dia
+                });
+            
                 await create_log(
                     "m_mat_dimension",
                     result[0].mat_id,

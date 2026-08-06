@@ -26,7 +26,7 @@ const getAllprocess_order = async (req, res) => {
         const newArray = final.map(({ 
             width, height, thick, area, curve, 
             min_thick, max_thick, cavity, weight, 
-            costperunit, file, id,mat_id, unit, ...rest 
+            costperunit, file, id,mat_id, unit, outer_dia, ...rest 
         }) => rest);
         const columnDefs = createColumnDefs(newArray)
         // console.log("newArray", newArray)

@@ -19,6 +19,8 @@ const PostSinglemat = () => {
       mat_unit: `${baseURL}/app2/m_mat/mat/unit/101`,
       mat_dimension: `${baseURL}/app2/m_mat/mat/dimension/1`,
       mat_cat_option: `${baseURL}/app2/option/m_component`,
+      statusCheckOption: `${baseURL}/app2/option/m_statusCheck`,
+
     }),
     []
   );
@@ -31,10 +33,11 @@ const PostSinglemat = () => {
 
     if (cols[0]) cols[0] = { ...cols[0], hidden: true };
     if (cols[1]) cols[1] = { ...cols[1], required: true, type: "text" };
+    if (cols[4]) cols[4] = { ...cols[4],headerName:"status_check", required: true,option: true};
 
     return cols;
   }, [data?.mat?.data]);
-
+  console.log("matColumn", matColumn);
   const matFileColumn = useMemo(() => {
     const source = data?.mat_file?.data || [];
     const cols = [...createColumnDefs(source)];
@@ -91,6 +94,11 @@ const PostSinglemat = () => {
           value: `${item.component}`,
           label: `${item.component_label} - ${item.unit}`,
         })) || [],
+      status_check_id:
+        data?.statusCheckOption?.data?.map((item) => ({
+          value: item.status_check_id,
+          label: item.label,
+      })) || [],
     }),
     [data]
   );
@@ -133,6 +141,13 @@ const PostSinglemat = () => {
       mode="create"
       tableName="Material"
       column={column}
+      initialValues={{
+        mat: {status_check_id: 1},
+        mat_cat: [],
+        mat_unit: [],
+        mat_dimension: [],
+        file: null,
+      }}
       optionsMap={optionsMap}
       loading={loading || mutationLoading}
       onSubmit={handleCreate}

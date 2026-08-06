@@ -64,11 +64,11 @@ export default function App2Layout() {
        
       ],
     },
-    {
-      key: "3",
-      icon: <ExceptionOutlined />,
-      label: <Link to="/product-register">product-register</Link>,
-    },
+    // {
+    //   key: "3",
+    //   icon: <ExceptionOutlined />,
+    //   label: <Link to="/product-register">product-register</Link>,
+    // },
     // {
     //   key: "product-spec",
     //   icon: <ExceptionOutlined />,
@@ -107,10 +107,31 @@ export default function App2Layout() {
     //   ],
     // },
     {
-      key: "emark",
+      key: "Data-sheet",
+      icon: <ExceptionOutlined />,
+      label: "product-Register",
+      children: [
+        {
+          key: "product-Register-1",
+          label: <Link to="/app2/Datasheet/WIP-Register">WIP-Register</Link>,
+        },
+        {
+          key: "product-Register-2",
+          label: <Link to="/app2/product-register/semifg-Register">SEMI-FG-Register</Link>,
+        },
+        {
+          key: "product-Register-3",
+          label: <Link to="/app2/product-Register/FG-Register">FG-Register</Link>,
+        },
+      ],
+    },
+
+    {
+      key: "certificate",
       icon: <ExceptionOutlined />,
       label: <Link to="/app2/certificate">certificate</Link>,
     },
+    
 
 
     {
@@ -159,7 +180,7 @@ export default function App2Layout() {
         },
         {
           key: "Routing Order tooling",
-          label: <Link to="/app2/process/drawingfile">Routing Order Tooling</Link>,
+          label: <Link to="/app2/process/routing-order-tooling">Routing Order Tooling</Link>,
         },
       ],
     },

@@ -28,6 +28,7 @@ const NUMBER_FIELDS = [
   "min_thick",
   "max_thick",
   "cavity",
+  "outer_dia"
 ];
 
 const shouldKeepHiddenValue = (fieldName = "") => {

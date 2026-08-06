@@ -27,6 +27,15 @@ import PutSingleCertificate from "./page/Certificate/PutSingleCertificate";
 import ProcessOrder from "./page/Routing/processOrder/ProcessOrder";
 import PostSingleProcessOrder from "./page/Routing/processOrder/PostSingleProcessOrder";
 import PutSingleProcessOrder from "./page/Routing/processOrder/PustSingleProcessOrder";
+import ProcessOrderTooling from "./page/Routing/processOrdertooling/ProcessRoutingTooling";
+import PostSingleProcessRoutingTooling from "./page/Routing/processOrdertooling/PostSingleProcessRoutingTooling";
+import PutSingleProcessRoutingTooling from "./page/Routing/processOrdertooling/PutSingleProcessRoutingTooling";
+import SemiFgRegister from "./page/ProductRegister/SemiFgRegister/SemiFgRegister";
+import POSTARRAYSemifg from "./page/ProductRegister/SemiFgRegister/POSTARRAYSemifg";
+import EditSemiFG from "./page/ProductRegister/SemiFgRegister/PUTARRAYSemifg";
+import Spec from "./page/Productspec/Spec/Productspec";
+import PostSinglespec from "./page/Productspec/Spec/PostSingleSpec";
+import PutSinglespec from "./page/Productspec/Spec/PutSinglespec";
 export const app2Routes = [
   {
     path: "/app2",
@@ -108,19 +117,19 @@ export const app2Routes = [
       {
         path: "product-spec/product-spec",
         element: (
-          <Productspec />
+          <Spec />
         )
       },
       {
         path: "product-spec/product-spec/postSingle",
         element: (
-          <PostSingleproductspec />
+          <PostSinglespec />
         )
       },
       {
         path: "product-spec/product-spec/updateSingle/:id",
         element: (
-          <UpdateSingleproductspec />
+          <PutSinglespec />
         )
       },
       {
@@ -193,6 +202,42 @@ export const app2Routes = [
         path: "process/routing-order/putSingle/:id",
         element: (
           < PutSingleProcessOrder/>
+        )
+      },
+      {
+        path: "process/routing-order-tooling/",
+        element: (
+          < ProcessOrderTooling/>
+        )
+      },
+      {
+        path: "process/routing-order-tooling/postSingle",
+        element: (
+          < PostSingleProcessRoutingTooling/>
+        )
+      },
+      {
+        path: "process/routing-order-tooling/putSingle/:id",
+        element: (
+          < PutSingleProcessRoutingTooling/>
+        )
+      },
+      {
+        path: "product-register/semifg-Register",
+        element: (
+          < SemiFgRegister/>
+        )
+      },
+      {
+        path: "product-register/semifg-Register/postArray",
+        element: (
+          < POSTARRAYSemifg/>
+        )
+      },
+      {
+        path: "product-register/semifg-Register/updateArray",
+        element: (
+          < EditSemiFG/>
         )
       },
     ]
