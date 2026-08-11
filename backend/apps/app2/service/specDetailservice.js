@@ -34,6 +34,18 @@ const getSinglespecDetailbyheaderservice = async (payload) => {
         const result = await dbconnect.query(mysql, [payload]);
         return result.rows
 }
+const getSinglespecDetail = async (payload) => {
+        const mysql =`
+        
+            SELECT
+            *
+            
+        FROM "blCpi".spec_detail
+        WHERE spec_detail_id = $1
+        `
+        const result = await dbconnect.query(mysql, [payload]);
+        return result.rows
+}
 const postDetail = async (payload) => {
     // console.log("payload", payload)
         const {
@@ -55,7 +67,7 @@ const postDetail = async (payload) => {
 const putDetail= async (payload) => {
     // console.log("payload", payload)
         const {
-            spec_header_id, header_component, mat_id, quantity
+            spec_header_id, header_component, mat_id, quantity, spec_detail_id
         } = payload;
         const mysql = `
             UPDATE "blCpi".spec_detail
@@ -65,7 +77,7 @@ const putDetail= async (payload) => {
         `;
     
         const values = [
-            spec_header_id, header_component, mat_id, quantity
+            spec_header_id, header_component, mat_id, quantity, spec_detail_id
           ];
     const result = await dbconnect.query(mysql, values);
     
@@ -79,7 +91,7 @@ const deleteDetail = async (payload) => {
         `;
     
         
-    const result = await dbconnect.query(mysql, [payload.spec_detail_id]);
+    const result = await dbconnect.query(mysql, [payload]);
     
     return result.rows
 }
@@ -123,6 +135,15 @@ const getSinglespecItembyheaderservice = async (payload) => {
     
         SELECT * FROM "blCpi".spec_item
         WHERE spec_header_id = $1
+    `
+    const result = await dbconnect.query(mysql, [payload]);
+    return result.rows
+}
+const getSinglespecItem = async (payload) => {
+    const mysql =`
+    
+        SELECT * FROM "blCpi".spec_item
+        WHERE spec_item_id = $1
     `
     const result = await dbconnect.query(mysql, [payload]);
     return result.rows
@@ -174,7 +195,7 @@ const deleteItem = async (payload) => {
         `;
     
         
-    const result = await dbconnect.query(mysql, [payload.spec_item_id]);
+    const result = await dbconnect.query(mysql, [payload]);
     
     return result.rows
 }
@@ -192,6 +213,9 @@ module.exports = {
 
     postItem,
     putItem,
-    deleteItem
+    deleteItem,
+
+    getSinglespecDetail,
+    getSinglespecItem
 
 };

@@ -12,7 +12,7 @@ const getAllspecController = async (req, res) => {
         const headerResult = await Service.getAllspecHeaderservice();
         const detailResult = await detailService.getAllspecDetailservice();
         const itemResult = await detailService.getAllspecItemservice();
-        console.log("itemResult", itemResult);
+        // console.log("itemResult", itemResult);
         const pivotedDetailResult = pivotERPData(detailResult, ["spec_header_id"]);
         const pivotedItemResult = pivotData(itemResult, {
             groupBy: ['spec_header_id'],
@@ -27,11 +27,11 @@ const getAllspecController = async (req, res) => {
         const step1 = leftJoin(headerResult, pivotedItemResult, 'spec_header_id', 'spec_header_id');
         // const finalResult = leftJoin(step1, pivotedItemResult, 'spec_header_id', 'spec_header_id');
         const finalResult = leftJoin(step1, pivotedDetailResult, 'spec_header_id', 'spec_header_id');
-        console.log("finalResult", finalResult);
+        // console.log("finalResult", finalResult);
         const columnDefs = createColumnDefs(finalResult);
         // console.log("headerResult", headerResult);
-        console.log("pivotedDetailResult", pivotedDetailResult)
-        console.log("pivotedItemResult", pivotedItemResult)
+        // console.log("pivotedDetailResult", pivotedDetailResult)
+        // console.log("pivotedItemResult", pivotedItemResult)
         res.status(200).json({
             success: true,
             msg: 'ดึงข้อมูลทั้งหมดได้สำเร็จ',
@@ -51,7 +51,7 @@ const getAllspecController = async (req, res) => {
 
 
 const getSinglespecController = async (req, res) => {
-    console.log("req.params.id", req.params.id);
+    // console.log("req.params.id", req.params.id);
     const id = Number(req.params.id);
     try {
         const getSingleheader = await Service.getSinglespecHeaderservice(id);
@@ -213,13 +213,12 @@ const putSingleheaderController = async (req, res) => {
     const user_id = req.user.id;
 
     try {
+        // Start Transaction
         await dbconnect.query('BEGIN');
 
         // ==========================================
         // 1. UPDATE HEADER
         // ==========================================
-        // FIX: Changed payload.header.mat_id to tooling_id (mat_id does not exist in header)
-        await dbconnect.query('BEGIN');
         if (!payload.header || !payload.header.spec_header_id) {
             await dbconnect.query("ROLLBACK");
             return res.status(400).json({
@@ -229,7 +228,7 @@ const putSingleheaderController = async (req, res) => {
         }
 
         const beforeheaderUpdate = await Service.getSinglespecHeaderservice(payload.header.spec_header_id);
-        const headerResult = await toolingService.putSingleprocessRoutingtooling(payload.header);
+        const headerResult = await Service.putHeader(payload.header);
         
         // GUARD: Ensure the header actually updated before proceeding
         if (!headerResult || headerResult.length === 0) {
@@ -248,55 +247,58 @@ const putSingleheaderController = async (req, res) => {
         // ==========================================
         // 2. SYNC DETAIL BOM
         // ==========================================
+        const detailsPayload = payload.details || []; // Defensive check to prevent crash if undefined
         const existingDetailresult = await detailService.getSinglespecDetailbyheaderservice(headerResult[0].spec_header_id);
-        const existingDetail_id = existingDetailresult.map(i => i.spec_header_id);
-        const incomingDetail_id = payload.details
-            .filter(i => i.process_routing_tooling_bom_id)
-            .map(i => i.process_routing_tooling_bom_id);
+        
+        // FIX: Changed mapping from spec_header_id to spec_detail_id to prevent catastrophic deletion logic
+        const existingDetail_id = existingDetailresult.map(i => i.spec_detail_id); 
+        const incomingDetail_id = detailsPayload
+            .filter(i => i.spec_detail_id)
+            .map(i => i.spec_detail_id);
      
         // Delete BOMs not present in the incoming payload
         const tobomDelete = existingDetail_id.filter(id => !incomingDetail_id.includes(id));
         
         if (tobomDelete.length > 0) {
-            // FIX: changed "toDelete" to "tobomDelete"
             for (const i of tobomDelete) {
-                const item = { process_routing_tooling_bom_id: i };
-                const toDeletebomresult = await toolingService.deleteSingleprocessRoutingtoolingBom(item);
+                const item = { spec_detail_id : i };
+                const toDeletebomresult = await detailService.deleteDetail(item);
                 await delete_log(
-                    "process_routing_order", 
-                    "process_routing_tooling_bom_id", 
-                    toDeletebomresult[0].process_routing_tooling_bom_id,
-                    toDeletebomresult[0].process_routing_tooling_bom_id, 
+                    "spec_detail", 
+                    "spec_detail_id", 
+                    toDeletebomresult[0].spec_detail_id,
+                    toDeletebomresult[0].spec_detail_id, 
                     user_id
                 );
             }
         }
 
         // Upsert BOMs (Update or Create)
-        for (const item of payload.detail_bom) {
+        for (const item of detailsPayload) {
             const i = {
-                process_routing_tooling_bom_id: item.process_routing_tooling_bom_id,
-                process_routing_tooling_id: headerResult[0].process_routing_tooling_id,
+                spec_detail_id: item.spec_detail_id,
+                spec_header_id: headerResult[0].spec_header_id,
                 mat_id: item.mat_id,
-                value: item.value
+                header_component: item.header_component,
+                quantity: item.quantity
             };
 
-            if (item.process_routing_tooling_bom_id && item.process_routing_tooling_bom_id !== "") {
-                const beforebomUpdate = await toolingService.getSingleprocessRoutingtoolingBombybomid(i.process_routing_tooling_bom_id);
-                const putResult = await toolingService.putSingleprocessRoutingtoolingBom(i);
+            if (item.spec_detail_id && item.spec_detail_id !== "") {
+                const beforebomUpdate = await detailService.getSinglespecDetail(i.spec_detail_id);
+                const putResult = await detailService.putDetail(i);
                 await update_log(
-                    "process_routing_order_tooling_bom", 
+                    "spec_detail", 
                     putResult[0], 
-                    putResult[0].process_routing_tooling_bom_id, 
+                    putResult[0].spec_detail_id, 
                     beforebomUpdate[0], 
                     putResult[0], 
                     user_id 
                 );
             } else {
-                const postResult = await toolingService.postSingleprocessRoutingtoolingBom(i);
+                const postResult = await detailService.postDetail(i);
                 await create_log(
-                    "process_routing_order_tooling_bom", 
-                    postResult[0].process_routing_tooling_bom_id, // Adjusted assumption for correct ID key
+                    "spec_detail", 
+                    postResult[0].spec_detail_id, 
                     user_id
                 );
             }
@@ -305,57 +307,57 @@ const putSingleheaderController = async (req, res) => {
         // ==========================================
         // 3. SYNC DETAIL MACHINE
         // ==========================================
-        const existingDetailmachineresult = await toolingService.getSingleprocessRoutingtoolingMachine(headerResult[0].process_routing_tooling_id);
-        const existingmachineDetail_id = existingDetailmachineresult.map(i => i.process_routing_order_tooling_machine_id);
-        const incomingmachineDetail_id = payload.detail_machine
-            .filter(i => i.process_routing_order_tooling_machine_id)
-            .map(i => i.process_routing_order_tooling_machine_id);
+        const itemsPayload = payload.items || []; // Defensive check
+        const existingItemresult = await detailService.getSinglespecItembyheaderservice(headerResult[0].spec_header_id);
+        const existingItemDetail_id = existingItemresult.map(i => i.spec_item_id);
+        const incomingItem_id = itemsPayload
+            .filter(i => i.spec_item_id)
+            .map(i => i.spec_item_id);
      
         // Delete Machines not present in the incoming payload
-        const tomachineDelete = existingmachineDetail_id.filter(id => !incomingmachineDetail_id.includes(id));
+        const toItemDelete = existingItemDetail_id.filter(id => !incomingItem_id.includes(id));
         
-        // FIX: changed "tobomDelete.length" to "tomachineDelete.length"
-        if (tomachineDelete.length > 0) {
-            // FIX: changed "toDelete" to "tomachineDelete"
-            for (const i of tomachineDelete) {
-                const item = { process_routing_order_tooling_machine_id: i };
-                // FIX: changed service from Bom to Machine
-                const toDeletemachineresult = await toolingService.deleteSingleprocessRoutingtoolingMachine(item);
+        if (toItemDelete.length > 0) {
+            for (const i of toItemDelete) {
+                const item = { spec_item_id: i };
+                const toDeleteItemresult = await detailService.deleteItem(item);
+                
+                // FIX: Changed log target from spec_header_id to spec_item_id
                 await delete_log(
-                    "process_routing_order_tooling_machine", 
-                    "process_routing_order_tooling_machine_id", 
-                    toDeletemachineresult[0].process_routing_order_tooling_machine_id,
-                    toDeletemachineresult[0].process_routing_order_tooling_machine_id, 
+                    "spec_item", 
+                    "spec_item_id", 
+                    toDeleteItemresult[0].spec_item_id,
+                    toDeleteItemresult[0].spec_item_id, 
                     user_id 
                 );
             }
         }
 
         // Upsert Machines (Update or Create)
-        for (const item of payload.detail_machine) {
+        for (const item of itemsPayload) {
             const i = {
-                process_routing_order_tooling_machine_id: item.process_routing_order_tooling_machine_id,
-                process_routing_tooling_id: headerResult[0].process_routing_tooling_id,
-                machine_id: item.machine_id,
-                value: item.value
+                spec_item_id : item.spec_item_id ,
+                spec_header_id: headerResult[0].spec_header_id,
+                header_component_item : item.header_component_item,
+                detail: item.detail
             };
 
-            if (item.process_routing_order_tooling_machine_id && item.process_routing_order_tooling_machine_id !== "") {
-                const beforemachineUpdate = await toolingService.getSingleprocessRoutingtoolingMachinebymachineid(i.process_routing_order_tooling_machine_id);
-                const putResult = await toolingService.putSingleprocessRoutingtoolingMachine(i);
+            if (item.spec_item_id && item.spec_item_id !== "") {
+                const beforeitemUpdate = await detailService.getSinglespecItem(i.spec_item_id);
+                const putResult = await detailService.putItem(i);
                 await update_log(
-                    "process_routing_order_tooling_machine", 
+                    "spec_item", 
                     putResult[0], 
-                    putResult[0].process_routing_order_tooling_machine_id, // FIX: Ensured correct ID key
-                    beforemachineUpdate[0], 
+                    putResult[0].spec_item_id, 
+                    beforeitemUpdate[0], 
                     putResult[0], 
                     user_id 
                 );
             } else {
-                const postResult = await toolingService.postSingleprocessRoutingtoolingMachine(i);
+                const postResult = await detailService.postItem(i);
                 await create_log(
-                    "process_routing_order_tooling_machine", 
-                    postResult[0].process_routing_order_tooling_machine_id, // FIX: Ensured correct ID key
+                    "spec_item", 
+                    postResult[0].spec_item_id, 
                     user_id
                 );
             }
@@ -363,15 +365,15 @@ const putSingleheaderController = async (req, res) => {
 
         // Commit Transaction
         await dbconnect.query('COMMIT');
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
-            msg: `Update record successful for Tooling ID: ${payload.header.tooling_id}`, // FIX: mat_id -> tooling_id
+            msg: `Update record successful for Tooling ID: ${payload.header.spec_code}`,
         });
 
     } catch (error) {
         await dbconnect.query('ROLLBACK');
         console.error("Transaction Error: ", error);
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             msg: 'มีปัญหาเกิดขึ้นระหว่างการบันทึกข้อมูล',
             error: error.message
@@ -383,5 +385,6 @@ module.exports = {
    
     getAllspecController,
     getSinglespecController,
-    postSingleheaderController
+    postSingleheaderController,
+    putSingleheaderController
 };

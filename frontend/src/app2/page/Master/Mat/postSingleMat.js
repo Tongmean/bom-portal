@@ -34,6 +34,8 @@ const PostSinglemat = () => {
     if (cols[0]) cols[0] = { ...cols[0], hidden: true };
     if (cols[1]) cols[1] = { ...cols[1], required: true, type: "text" };
     if (cols[4]) cols[4] = { ...cols[4],headerName:"status_check", required: true,option: true};
+    // if (cols[5]) cols[5] = { ...cols[5], required: false , type: "text" };
+
 
     return cols;
   }, [data?.mat?.data]);
@@ -142,7 +144,7 @@ const PostSinglemat = () => {
       tableName="Material"
       column={column}
       initialValues={{
-        mat: {status_check_id: 1},
+        mat: {status_check_id: 1, revision : "REV. 00"},
         mat_cat: [],
         mat_unit: [],
         mat_dimension: [],

@@ -109,7 +109,6 @@ const PutSinglesdpackaging = () => {
       if (result?.success) {
         message.success(result.data?.msg || "Post Success" || "Create successful");
         // console.log("result", result);
-        navigate("/app2/engineering");
         setTimeout(() => {
           navigateWithHighlight({
             navigate,

@@ -13,6 +13,7 @@ const certificateRoute = require('./routes/certificateRoute')
 const processRoute = require('./routes/processOrderroute')   
 const processRoutetooling = require('./routes/processOrderroutTooling')   
 const semifg = require('./routes/semiRegisterRoute')   
+const productReg = require('./routes/productRegRoutes')   
 router.use('/sdpackaging', sdpackagingRoute);
 router.use('/engineering', engineeringRoute);
 router.use('/customer', customerRoute);
@@ -26,6 +27,7 @@ router.use('/certificate', certificateRoute);
 router.use('/process_tooling', processRoutetooling);
 router.use('/process', processRoute);
 router.use('/semi-register', semifg);
+router.use('/product-register', productReg);
 
 
 

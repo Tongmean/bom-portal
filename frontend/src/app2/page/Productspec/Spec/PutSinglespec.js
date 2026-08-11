@@ -5,6 +5,9 @@ import useMutation from "../../../hook/useMutation";
 import { baseURL } from "../../../../utility/apiClient";
 import { message, Card, Typography, Spin } from "antd";
 import DynamicForm from "./DynamicForm";
+import {
+  navigateWithHighlight,
+} from "../../../utility/navigationHighlight";
 
 const { Title, Text } = Typography;
 
@@ -94,22 +97,27 @@ const PutSinglespec = () => {
     }),
     [data]
   );
-    console.log("optionsMap", optionsMap);
-    console.log("initialData", initialData);
+    // console.log("optionsMap", optionsMap);
+    // console.log("initialData", initialData);
   const handleUpdate = async (payload) => {
     try {
-      console.log("PUT payload", payload);
-      // const result = await mutate({
-      //   url: `${baseURL}/app2/productspec/putSingle`, // Adjust your PUT endpoint as needed
-      //   method: "POST",
-      //   data: payload,
-      // });
-      // if (result.success) {
-      //   message.success(result.data?.msg || "Specification updated successfully");
-      //   navigate(-1); // Redirect back on success
-      // } else {
-      //   message.error(mutationError || "An error occurred while updating.");
-      // }
+      // console.log("PUT payload", payload);
+      const result = await mutate({
+        url: `${baseURL}/app2/spec/putSingle`, // Adjust your PUT endpoint as needed
+        method: "POST",
+        data: payload,
+      });
+      if (result.success) {
+        message.success(result.data?.msg || "Specification updated successfully");
+        navigateWithHighlight({
+          navigate,
+          path: "/app2/product-spec/Customer",
+          ids: [id],
+          idField: "spec_header_id",
+        });
+      } else {
+        message.error(mutationError || "An error occurred while updating.");
+      }
     } catch (err) {
       console.error(mutationError);
     }
@@ -148,6 +156,7 @@ const PutSinglespec = () => {
         style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
       >
         <DynamicForm 
+          mutationLoading= {mutationLoading}
           headerColumn={headerColumn}
           detailColumn={detailColumn}
           itemColumn={itemColumn}
@@ -156,7 +165,14 @@ const PutSinglespec = () => {
           optionsMap={optionsMap}
           initialValues={initialData} // Passes the fetched existing data here
           onSubmit={handleUpdate}
-          onBack={() => navigate(-1)}
+          onBack={() =>
+            navigateWithHighlight({
+              navigate,
+              path: "/app2/product-spec/Customer",
+              ids: [id], // Assuming spec_header_id is the unique identifier
+              idField: "spec_header_id",
+            })
+          }
           mode="PUT"
         />
       </Card>

@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/', Controller.getAllspecController);
 router.get('/:id', Controller.getSinglespecController);
 router.post('/postSingle', Controller.postSingleheaderController);
-// router.post('/putArray', Controller.updateArrayController);
+router.post('/putSingle', Controller.putSingleheaderController);
 
 
 

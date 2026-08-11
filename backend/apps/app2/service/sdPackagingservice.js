@@ -24,7 +24,8 @@ const getAllsdpackaging = async () => {
                 LEFT JOIN "blCpi".m_status_check AS cs
                 ON cs.status_check_id = sh.check_status
                 
-            ORDER BY sd.quantity ASC
+            ORDER BY sd.quantity ASC ,
+            sh.sdpackaging_header_id DESC
 
         `
         const result = await dbconnect.query(mysql);

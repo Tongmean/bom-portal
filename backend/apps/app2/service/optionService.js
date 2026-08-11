@@ -84,6 +84,56 @@ const getOptionheaderSpeccomponent = async () => {
     const result = await dbconnect.query(mysql);
     return result.rows
 }
+//product reg
+const getOptiondrawing = async () => {
+    const mysql =`
+        SELECT * FROM "blCpi".drawing_header
+        ORDER BY drawing_header_id DESC
+        `
+    const result = await dbconnect.query(mysql);
+    return result.rows
+}
+const getOptionspec = async () => {
+    const mysql =`
+            SELECT * FROM "blCpi".spec_header
+            ORDER BY spec_header_id DESC 
+        `
+    const result = await dbconnect.query(mysql);
+    return result.rows
+}
+const getOptionsdpackage = async () => {
+    const mysql =`
+        SELECT * FROM "blCpi".sdpackaging_header
+        ORDER BY sdpackaging_header_id DESC 
+        `
+    const result = await dbconnect.query(mysql);
+    return result.rows
+}
+const getOptioncertificate = async () => {
+    const mysql =`
+        SELECT * FROM "blCpi".certificate
+        ORDER BY certificate_id DESC 
+        `
+    const result = await dbconnect.query(mysql);
+    return result.rows
+}
+const getOptionproduct_reg_item_option = async () => {
+    const mysql =`
+            SELECT * FROM "blCpi".product_reg_item_option
+            ORDER BY option_header DESC 
+        `
+    const result = await dbconnect.query(mysql);
+    return result.rows
+}
+const getOptionfoam = async () => {
+    const mysql =`
+    SELECT * FROM "blCpi".foam_header
+    ORDER BY foam_header_id DESC 
+        `
+    const result = await dbconnect.query(mysql);
+    return result.rows
+}
+
 module.exports = {
     getAllm_channel,
     getAllm_status,
@@ -93,7 +143,15 @@ module.exports = {
     getOptioncomponent,
     getOptionroutingOrder,
     getOptionheaderSpeccomponentOption,
-    getOptionheaderSpeccomponent
+    getOptionheaderSpeccomponent,
+
+    getOptiondrawing,
+    getOptionspec,
+    getOptionsdpackage,
+    getOptioncertificate,
+    getOptionproduct_reg_item_option,
+    getOptionfoam
+
 
 
 };

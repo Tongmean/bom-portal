@@ -5,6 +5,7 @@ import { PlusOutlined, MinusCircleOutlined, ArrowLeftOutlined } from '@ant-desig
 const { Option } = Select;
 
 export default function DynamicForm({
+  mutationLoading = mutationLoading,
   headerColumn = [],
   detailColumn = [],
   itemColumn = [],
@@ -260,7 +261,7 @@ export default function DynamicForm({
           <Button size="large" onClick={onBack} icon={<ArrowLeftOutlined />}>
             Back
           </Button>
-          <Button type="primary" htmlType="submit" size="large">
+          <Button type="primary" htmlType="submit" size="large" loading={mutationLoading}>
             {mode === 'POST' ? 'Submit (Create New)' : 'Save Changes (Update)'}
           </Button>
         </div>

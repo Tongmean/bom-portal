@@ -27,7 +27,7 @@ const getAllmatController = async (req, res) => {
 const getSinglematController = async (req, res) => {
     try {
         const result = await Service.getSinglemat(req.params.id)    
-        const mappedResult = result.map(item => ({mat_id:item.mat_id,erp: item.erp, name: item.name, id: item.id, mat_id: item.mat_id, status_check_id: Number(item.status_check_id)}));    
+        const mappedResult = result.map(item => ({mat_id:item.mat_id,erp: item.erp, name: item.name, id: item.id, mat_id: item.mat_id, status_check_id: Number(item.status_check_id), revision: item.revision}));    
         res.status(200).json({
             success: true,
             msg: 'ดึงข้อมูลทั้งหมดได้สำเร็จ',

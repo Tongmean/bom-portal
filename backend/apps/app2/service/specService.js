@@ -29,7 +29,7 @@ const getAllspecHeaderservice = async () => {
             ON co.chanel_option_id = sh.chanel_option_id
         LEFT JOIN "blCpi".m_status_check AS sc
             ON sc.status_check_id = sh.status_check_id
-        ORDER BY spec_header_id ASC 
+        ORDER BY spec_header_id DESC 
 
         `
         const result = await dbconnect.query(mysql);

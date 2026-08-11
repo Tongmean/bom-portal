@@ -43,7 +43,11 @@ export default function App2Layout() {
       children: [
         {
           key: "Display-1",
-          label: <Link to="display/bomdisplay">Bill of Material</Link>,
+          label: <Link to="display/flat">flat Bom</Link>,
+        },
+        {
+          key: "Display-1",
+          label: <Link to="display/layer">layer Bom</Link>,
         },
        
       ],
@@ -121,7 +125,7 @@ export default function App2Layout() {
         },
         {
           key: "product-Register-3",
-          label: <Link to="/app2/product-Register/FG-Register">FG-Register</Link>,
+          label: <Link to="/app2/product-register/FG-Register">FG-Register</Link>,
         },
       ],
     },

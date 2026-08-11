@@ -36,6 +36,10 @@ import EditSemiFG from "./page/ProductRegister/SemiFgRegister/PUTARRAYSemifg";
 import Spec from "./page/Productspec/Spec/Productspec";
 import PostSinglespec from "./page/Productspec/Spec/PostSingleSpec";
 import PutSinglespec from "./page/Productspec/Spec/PutSinglespec";
+
+import ProductReg from "./page/ProductRegister/FgRegister/ProductReg";
+import PostSingleProductReg from "./page/ProductRegister/FgRegister/PostSingleProductReg";
+import PutSingleProductReg from "./page/ProductRegister/FgRegister/PutSingleProductReg";
 export const app2Routes = [
   {
     path: "/app2",
@@ -238,6 +242,25 @@ export const app2Routes = [
         path: "product-register/semifg-Register/updateArray",
         element: (
           < EditSemiFG/>
+        )
+      },
+     
+      {
+        path: "product-register/FG-Register",
+        element: (
+          < ProductReg/>
+        )
+      },
+      {
+        path: "product-register/FG-Register/postSingle",
+        element: (
+          < PostSingleProductReg/>
+        )
+      },
+      {
+        path: "product-register/FG-Register/putSingle/:id",
+        element: (
+          < PutSingleProductReg/>
         )
       },
     ]

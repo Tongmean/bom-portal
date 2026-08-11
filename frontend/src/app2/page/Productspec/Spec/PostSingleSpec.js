@@ -140,6 +140,7 @@ const PostSinglespec = () => {
         style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
       >
         <DynamicForm 
+          mutationLoading= {mutationLoading}
           headerColumn={headerColumn}
           detailColumn={detailColumn}
           itemColumn={itemColumn}

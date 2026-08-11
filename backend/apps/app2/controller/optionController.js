@@ -164,6 +164,36 @@ const getOptionheaderSpeccomponentOptionController = async (req, res) => {
         });
     }
 };
+const getOptionproductRegController = async (req, res) => {
+    try {
+        const resultSpec = await Service.getOptionspec()   
+        const resultDrawing = await Service.getOptiondrawing()
+        const resultSdpackage = await Service.getOptionsdpackage()
+        const resultCertificate = await Service.getOptioncertificate()
+        const resultProductRegItemOption = await Service.getOptionproduct_reg_item_option()     
+        const foam = await Service.getOptionfoam()
+        res.status(200).json({
+            success: true,
+            msg: 'ดึงข้อมูลทั้งหมดได้สำเร็จ',
+            data: {
+                resultSpec: resultSpec,
+                resultDrawing: resultDrawing,
+                resultSdpackage: resultSdpackage,
+                resultCertificate: resultCertificate,
+                resultProductRegItemOption: resultProductRegItemOption,
+                resultfoam: foam
+            }
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+        success: false,
+        msg: 'มีปัญหาเกิดขึ้นระหว่างการดึงข้อมูล',
+        error: error.message
+        });
+    }
+};
 
 
 
@@ -177,6 +207,10 @@ module.exports = {
     getOptionroutingOrderController,
 
     getOptionheaderSpeccomponentController,
-    getOptionheaderSpeccomponentOptionController
+    getOptionheaderSpeccomponentOptionController,
+
+    getOptionproductRegController
+
+
 
 };

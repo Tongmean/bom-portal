@@ -23,6 +23,7 @@ const getAllmat = async () => {
             mm.name,
             mm.id,
             sc.label AS status_check,
+            mm.revision,
             mcho.component_label AS "component",
             mcho.unit,
             md.width,
@@ -80,8 +81,8 @@ const postMat = async (payload) => {
     
     const mysql = `
         INSERT INTO "blCpi".m_mat(
-            erp, name, id , status_check_id)
-            VALUES ($1, $2, $3, $4)
+            erp, name, id , status_check_id, revision)
+            VALUES ($1, $2, $3, $4, $5)
         RETURNING *;
     `;
 
@@ -90,7 +91,7 @@ const postMat = async (payload) => {
     const safeName = typeof payload.name === 'string' ? payload.name.trim() : payload.name;
     const safeId = typeof payload.id === 'string' ? payload.id.trim() : payload.id;
 
-    const result = await dbconnect.query(mysql, [safeErp, safeName, safeId, payload.status_check_id]);
+    const result = await dbconnect.query(mysql, [safeErp, safeName, safeId, payload.status_check_id, payload.revision]);
     
     return result.rows;
 }
@@ -98,11 +99,11 @@ const postMat = async (payload) => {
 const putMat = async (payload) => {
         const mysql =`
         UPDATE "blCpi".m_mat
-        SET erp=$1, name=$2, id=$3, status_check_id=$4
-        WHERE mat_id= $5
+        SET erp=$1, name=$2, id=$3, status_check_id=$4, revision=$5
+        WHERE mat_id= $6
         RETURNING *;
         `
-    const result = await dbconnect.query(mysql, [payload.erp, payload.name, payload.id,payload.status_check_id, payload.mat_id]);
+    const result = await dbconnect.query(mysql, [payload.erp, payload.name, payload.id,payload.status_check_id,payload.revision, payload.mat_id]);
     return result.rows
 }
 const deleteMat = async (payload) => {
