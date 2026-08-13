@@ -119,17 +119,114 @@ const getSingleproductRegController = async (req, res) => {
 };
 
 
+// const postSingleheaderController = async (req, res) => {
+//     const { header_ColumnDefs: header, detail_ColumnDefs: items, mat_ColumnDefs: mat } = req.body[0];
+//     const user_id = req.user.id;
+//     console.log("Received request body:", req.body[0]); // Debugging line to check the request body
+//     try {
+//         await dbconnect.query('BEGIN');
+
+//         // 1. Check Duplicate
+//         const checkDuplicate = await Service.checkDuplicate(header.production_code);
+//         if (checkDuplicate.length > 0) {
+//             // FIX: Must rollback before returning early!
+//             await dbconnect.query('ROLLBACK'); 
+//             return res.status(400).json({
+//                 success: false,
+//                 data: checkDuplicate,
+//                 msg: `รหัสสินค้าสำเร็จรูป: ${header.production_code} มีในฐานข้อมูลอยู่แล้ว กรุณาลองรหัสใหม่!`
+//             });
+//         }
+
+//         // FIX: Declare matResult outside the if-block so it can be accessed later
+//         let matResult; 
+        
+//         if (mat) {
+//             matResult = await matService.postMat(mat);
+//             if (matResult && matResult.length > 0) {
+//                 const bomResult = await bomService.postBomdetail({
+//                     parrent_mat_id: matResult[0].mat_id,
+//                     child_mat_id: header.semi_mat_id,
+//                     quantity: 1,
+//                     priority: 1
+//                 })
+//                 await create_log("m_mat", matResult[0].mat_id, user_id);
+//                 await create_log("bom_detail", bomResult[0].bom_detail_id, user_id);
+
+//             }
+//         }
+
+//         if (matResult && matResult[0]?.mat_id && header.production_type === 'LiningBrake') {
+//             const matCatresult = await matCateservice.postMatcat({ mat_id: matResult[0].mat_id, mat_cat: 'FG-Brake-Lining' });
+//             if (matCatresult && matCatresult.length > 0) {
+//                 await create_log("m_mat_cat", matCatresult[0].mat_cat_id, user_id);
+//             }
+//         }
+
+//         // FIX: Ensure we have an ID to pass. If 'mat' wasn't passed, fallback to whatever is in the header
+//         const fg_mat_id = matResult ? matResult[0].mat_id : header.fg_mat_id; 
+
+//         // Insert product spec header
+//         const headerResult = await Service.postSingleheader(header, { fg_mat_id });
+        
+//         if (headerResult && headerResult.length > 0) {
+//             await create_log("product_reg", headerResult[0].product_reg_id, user_id);
+//         }
+
+//         // Insert product spec detail
+//         const insertItems = [];
+        
+//         // Optional safety check in case 'items' is empty/undefined
+//         if (items && items.length > 0) { 
+//             for (const i of items) {
+//                 const item = {
+//                     option_header: i.option_header,
+//                     detail: i.detail,
+//                     product_reg_id: headerResult[0].product_reg_id
+//                 };
+                
+//                 // FIX: Added missing 'await' 
+//                 const itemsResults = await Service.postSingledetail(item); 
+//                 insertItems.push(itemsResults[0].option_header);
+//                 await create_log("productspec_detail", itemsResults[0].product_reg_option_id, user_id);
+//             }
+//         }
+
+//         await dbconnect.query('COMMIT');
+        
+//         res.status(200).json({
+//             success: true,
+//             msg: `save record successfull: ${headerResult[0].production_code} && ${insertItems.join(",")}`,
+//             data: {
+//                 // FIX: Grab production_code from the headerResult or header
+//                 header: headerResult[0].production_code, 
+//                 items: insertItems
+//             }
+//         });
+
+//     } catch (error) {
+//         await dbconnect.query('ROLLBACK');
+//         console.error(error);
+//         res.status(500).json({
+//             success: false,
+//             msg: 'มีปัญหาเกิดขึ้นระหว่างการดึงข้อมูล',
+//             error: error.message
+//         });
+//     }
+// };
+
+
 const postSingleheaderController = async (req, res) => {
     const { header_ColumnDefs: header, detail_ColumnDefs: items, mat_ColumnDefs: mat } = req.body[0];
     const user_id = req.user.id;
     console.log("Received request body:", req.body[0]); // Debugging line to check the request body
+    
     try {
         await dbconnect.query('BEGIN');
 
         // 1. Check Duplicate
         const checkDuplicate = await Service.checkDuplicate(header.production_code);
         if (checkDuplicate.length > 0) {
-            // FIX: Must rollback before returning early!
             await dbconnect.query('ROLLBACK'); 
             return res.status(400).json({
                 success: false,
@@ -138,45 +235,72 @@ const postSingleheaderController = async (req, res) => {
             });
         }
 
-        // FIX: Declare matResult outside the if-block so it can be accessed later
         let matResult; 
         
+        // 2. Handle Material (mat) and BOM Creation
         if (mat) {
-            matResult = await matService.postMat(mat);
+            const checkDuplicateMat = await matService.checkDuplicate(mat.erp);
+            if(checkDuplicateMat.length > 0) {
+                matResult = checkDuplicateMat[0].mat_id; // Use existing material if duplicate found
+            }else{
+                matResult = await matService.postMat(mat);
+            }
+            
             if (matResult && matResult.length > 0) {
-                const bomResult = await bomService.postBomdetail({
-                    parrent_mat_id: matResult[0].mat_id,
-                    child_mat_id: header.semi_mat_id,
-                    quantity: 1,
-                    priority: 1
-                })
                 await create_log("m_mat", matResult[0].mat_id, user_id);
-                await create_log("bom_detail", bomResult[0].bom_detail_id, user_id);
 
+                // GUARD: Only post BOM if semi_mat_id actually exists
+                if (header.semi_mat_id) {
+                    const bomResult = await bomService.postBomdetail({
+                        parrent_mat_id: matResult[0].mat_id,
+                        child_mat_id: header.semi_mat_id,
+                        quantity: 1,
+                        priority: 1
+                    });
+                    
+                    if (bomResult && bomResult.length > 0) {
+                        await create_log("bom_detail", bomResult[0].bom_detail_id, user_id);
+                    }
+                }
             }
         }
 
-        if (matResult && matResult[0]?.mat_id && header.production_type === 'LiningBrake') {
-            const matCatresult = await matCateservice.postMatcat({ mat_id: matResult[0].mat_id, mat_cat: 'FG-Brake-Lining' });
+        // 3. Map Production Type to Material Category
+        const productionTypeToMatCat = {
+            'LiningBrake': 'FG-Brake-Lining',
+            'shoesBrake': 'FG-Brake-Shoes',
+            'discBrake': 'FG-Brake-Disc'
+        };
+
+        const targetMatCat = productionTypeToMatCat[header.production_type];
+
+        // 4. Handle Material Category Creation
+        if (matResult && matResult[0]?.mat_id && targetMatCat) {
+            const matCatresult = await matCateservice.postMatcat({ 
+                mat_id: matResult[0].mat_id, 
+                mat_cat: targetMatCat 
+            });
+            
             if (matCatresult && matCatresult.length > 0) {
                 await create_log("m_mat_cat", matCatresult[0].mat_cat_id, user_id);
             }
         }
 
-        // FIX: Ensure we have an ID to pass. If 'mat' wasn't passed, fallback to whatever is in the header
+        // Ensure we have an ID to pass. If 'mat' wasn't passed, fallback to whatever is in the header
         const fg_mat_id = matResult ? matResult[0].mat_id : header.fg_mat_id; 
 
-        // Insert product spec header
+        // 5. Insert product spec header
         const headerResult = await Service.postSingleheader(header, { fg_mat_id });
         
-        if (headerResult && headerResult.length > 0) {
-            await create_log("product_reg", headerResult[0].product_reg_id, user_id);
+        if (!headerResult || headerResult.length === 0) {
+            throw new Error(`ไม่สามารถสร้าง Header Product Spec ได้`);
         }
+        
+        await create_log("product_reg", headerResult[0].product_reg_id, user_id);
 
-        // Insert product spec detail
+        // 6. Insert product spec details
         const insertItems = [];
         
-        // Optional safety check in case 'items' is empty/undefined
         if (items && items.length > 0) { 
             for (const i of items) {
                 const item = {
@@ -185,10 +309,12 @@ const postSingleheaderController = async (req, res) => {
                     product_reg_id: headerResult[0].product_reg_id
                 };
                 
-                // FIX: Added missing 'await' 
                 const itemsResults = await Service.postSingledetail(item); 
-                insertItems.push(itemsResults[0].option_header);
-                await create_log("productspec_detail", itemsResults[0].product_reg_option_id, user_id);
+                
+                if (itemsResults && itemsResults.length > 0) {
+                    insertItems.push(itemsResults[0].option_header);
+                    await create_log("productspec_detail", itemsResults[0].product_reg_option_id, user_id);
+                }
             }
         }
 
@@ -198,7 +324,6 @@ const postSingleheaderController = async (req, res) => {
             success: true,
             msg: `save record successfull: ${headerResult[0].production_code} && ${insertItems.join(",")}`,
             data: {
-                // FIX: Grab production_code from the headerResult or header
                 header: headerResult[0].production_code, 
                 items: insertItems
             }
@@ -206,22 +331,22 @@ const postSingleheaderController = async (req, res) => {
 
     } catch (error) {
         await dbconnect.query('ROLLBACK');
-        console.error(error);
+        console.error("Transaction Error:", error);
         res.status(500).json({
             success: false,
-            msg: 'มีปัญหาเกิดขึ้นระหว่างการดึงข้อมูล',
+            msg: 'มีปัญหาเกิดขึ้นระหว่างการบันทึกข้อมูล',
             error: error.message
         });
     }
 };
 
-
 const putSingleheaderController = async (req, res) => {
-    // console.log("payload", payload)
-    const user_id = req.user.id
-    const { header_ColumnDefs: header, detail_ColumnDefs: items, mat_ColumnDefs: mat } = req.body[0];
+    const user_id = req.user.id;
+    const { header_ColumnDefs: header, detail_ColumnDefs: detail, mat_ColumnDefs: mat } = req.body[0];
+
     try {
-        await dbconnect.query('BEGIN')
+        await dbconnect.query('BEGIN');
+
         if (!header) {
             await dbconnect.query("ROLLBACK");
             return res.status(400).json({
@@ -229,98 +354,178 @@ const putSingleheaderController = async (req, res) => {
                 msg: "กรุณาเพิ่มข้อมูล Material ก่อนบันทึก!" // Please add Material data before saving!
             });
         }
-        // 1. Update Header (Material)
+
+        // 0. Update Material (mat)
+        if (mat) {
+            const beforeMatUpdate = await matService.getSinglemat(mat.mat_id);
+            const matResult = await matService.putMat(mat);
+            
+            if (matResult && matResult.length > 0) {
+                await update_log(
+                    "m_mat",
+                    matResult[0],
+                    matResult[0].mat_id,
+                    beforeMatUpdate[0], 
+                    matResult[0],
+                    user_id
+                );
+            }
+
+            // Map the production types to their corresponding material categories
+            const productionTypeToMatCat = {
+                'LiningBrake': 'FG-Brake-Lining',
+                'shoesBrake': 'FG-Brake-Shoes',
+                'discBrake': 'FG-Brake-Disc'
+            };
+
+            // Look up the category based on the incoming production_type
+            const targetMatCat = productionTypeToMatCat[header.production_type];
+
+            // If matResult is valid AND the production_type exists in our map, proceed
+            if (matResult && matResult[0]?.mat_id && targetMatCat) {
+                const beforeMatCatUpdate = await matCateservice.getSinglematCat(matResult[0].mat_id);
+                
+                const matCatresult = await matCateservice.putMatcat({ 
+                    mat_id: matResult[0].mat_id, 
+                    mat_cat: targetMatCat 
+                });
+                
+                if (matCatresult && matCatresult.length > 0) {
+                    await update_log(
+                        "m_mat_cat",
+                        matCatresult[0],
+                        matCatresult[0].mat_cat_id,
+                        beforeMatCatUpdate[0], 
+                        matCatresult[0],
+                        user_id
+                    );
+                }
+            } 
+
+            if (header.semi_mat_id) {
+                const beforeBomUpdate = await bomService.getSinglebyfg(matResult[0].mat_id);
+                const bomResult = await bomService.putBomdetail({
+                    parrent_mat_id: matResult[0].mat_id,
+                    child_mat_id: header.semi_mat_id,
+                    quantity: 1,
+                    priority: 1,
+                    bom_detail_id: beforeBomUpdate[0].bom_detail_id  // Assuming you want to update the existing BOM detail
+                });
+
+                if (bomResult && bomResult.length > 0) {
+                    await update_log(
+                        "bom_detail",
+                        bomResult[0],
+                        bomResult[0].bom_detail_id,
+                        beforeBomUpdate[0], 
+                        bomResult[0],
+                        user_id
+                    );
+                }
+            }
+        }
+
+        // 1. Update Header (Product Reg)
         const beforeheaderUpdate = await Service.getSingleprodutReg(header.product_reg_id);
-        const headerResult = await Service.putSingleheader(header);
-        
+        const headerResult = await Service.putSingleheader(header, { fg_mat_id: mat?.mat_id });
+
         // GUARD: Ensure the main material actually updated before proceeding
         if (!headerResult || headerResult.length === 0) {
-            throw new Error(`ไม่พบ Material ID: ${payload.header.process_routing_id} ในระบบ`); 
+            throw new Error(`ไม่พบ Material ID: ${header.production_code} ในระบบ`);
         }
 
-        if(headerResult){
-            await update_log(
-                "process_routing",
-                headerResult[0],
-                headerResult[0].process_routing_id,
-                beforeheaderUpdate[0],
-                headerResult[0],
-                user_id
-            );
-        }
+        await update_log(
+            "product_reg",
+            headerResult[0],
+            headerResult[0].product_reg_id,
+            beforeheaderUpdate[0],
+            headerResult[0],
+            user_id
+        );
 
-        //2. get detail by header id
-        const existingDetailresult = await Service.getSinlgeprocessRoutingorderbyroutingid(headerResult[0].process_routing_id);
-        //3. map existing id
-        const existingDetail_id = existingDetailresult.map(i => i.process_routing_order_id)
-        //4. find new detail
-        const incomingDetail_id = payload.detail.filter((i) =>i.process_routing_order_id).map((i) => i.process_routing_order_id)
-     
-        //5. delete in case not existing and not imcoming
-        const toDelete = existingDetail_id.filter(process_routing_order_id => !incomingDetail_id.includes(process_routing_order_id))
-        // console.log("toDelete",toDelete)
-        if (toDelete.length > 0){
-            const toDeletelist = []
-            for(const i of toDelete){
-                const item = {
-                    process_routing_order_id: i
+        // 2-5. Handle Detail Deletions
+        const existingDetailresult = await Service.getSingleprodutRegitembyregid(headerResult[0].product_reg_id);
+        const existingDetail_id = existingDetailresult.map(i => i.product_reg_item);
+        const incomingDetail_id = detail.filter(i => i.product_reg_item).map(i => i.product_reg_item);
+
+        const toDelete = existingDetail_id.filter(id => !incomingDetail_id.includes(id));
+
+        if (toDelete.length > 0) {
+            for (const id of toDelete) {
+                const toDeleteresult = await Service.deleteSingledetail(id);
+                
+                // GUARD: Check if delete was successful to avoid reading [0] of undefined
+                if (toDeleteresult && toDeleteresult.length > 0) {
+                    await delete_log(
+                        "product_reg_option_id", 
+                        "product_reg_item", 
+                        toDeleteresult[0].product_reg_option_id, 
+                        toDeleteresult[0].product_reg_option_id, 
+                        user_id
+                    );
                 }
-                // const beforeDelete = await detailService.getSingledetailEngineering(item)
-                const toDeleteresult = await Service.deleteProcessRoutingOrder(item.process_routing_order_id)
-                toDeletelist.push(toDeleteresult[0].process_routing_order_id)
-                await delete_log("process_routing_order", "process_routing_order_id", toDeleteresult[0].process_routing_order_id,toDeleteresult[0].process_routing_order_id, user_id )
-                // const delete_log = async (table_name,column_name, record_id,old_Value,action_by) =>{
             }
         }
-        //6. for loop to put (id) Or post (not id)
-        for (const item of payload.detail){
+
+        // 6. Handle Detail Inserts/Updates
+        for (const item of detail) {
             const i = {
-                process_routing_order_id: item.process_routing_order_id,
-                process_routing_id: headerResult[0].process_routing_id,
-                process_order: item.process_order,
-                process: item.process
-               
-            }
-            if(
-                item.process_routing_order_id &&
-                item.process_routing_order_id !== ""
-            ){
-                const beforeDelete = await Service.getSinlgeprocessRoutingorder(i.process_routing_order_id)
-                const putResult = await Service.putProcessRoutingOrder(i)
-                await update_log("process_routing_order", putResult[0], putResult[0].process_routing_order_id,beforeDelete[0], putResult[0], user_id )
+                product_reg_option_id: item.product_reg_option_id,
+                product_reg_id: headerResult[0].product_reg_id,
+                option_header: item.option_header,
+                detail: item.detail
+            };
 
-            }else{
-                const postResult = await Service.postSingleProcessRoutingOrder(i)
-                await create_log("process_routing_order", postResult[0].process_routing_order_id, user_id)
-
+            if (item.product_reg_option_id && item.product_reg_option_id !== "") {
+                const beforeDelete = await Service.getSingleprodutRegitem(i.product_reg_option_id);
+                const putResult = await Service.putSingledetail(i);
+                
+                if (putResult && putResult.length > 0) {
+                    await update_log(
+                        "product_reg_item", 
+                        putResult[0], 
+                        putResult[0].product_reg_option_id,
+                        beforeDelete[0], 
+                        putResult[0], 
+                        user_id
+                    );
+                }
+            } else {
+                const postResult = await Service.postSingleProcessRoutingOrder(i);
+                
+                if (postResult && postResult.length > 0) {
+                    await create_log(
+                        "product_reg_item", 
+                        postResult[0].product_reg_option_id, 
+                        user_id
+                    );
+                }
             }
         }
+
         await dbconnect.query('COMMIT');
+        
         res.status(200).json({
             success: true,
-            msg: `Update record successfull: ${payload.header.mat_id} `,
-            // data: {
-            //     header:productspecResult,
-            //     items: insertItems
-            // }
+            msg: `Update record successfull: ${header.production_code}`
         });
 
     } catch (error) {
         await dbconnect.query('ROLLBACK');
-        console.error(error);
+        console.error("Transaction Error:", error);
         res.status(500).json({
-        success: false,
-        msg: 'มีปัญหาเกิดขึ้นระหว่างการดึงข้อมูล',
-        error: error.message
+            success: false,
+            msg: 'มีปัญหาเกิดขึ้นระหว่างการดึงข้อมูล', 
+            error: error.message
         });
     }
 };
 
 
-
 module.exports = {
     getAllproductRegController,
     getSingleproductRegController,
-    postSingleheaderController
+    postSingleheaderController,
+    putSingleheaderController
     
 };

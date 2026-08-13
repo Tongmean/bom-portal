@@ -7,9 +7,12 @@ import useFetchMultiple from "../../../hook/useFetchmultiple";
 import useMutation from "../../../hook/useMutation";
 import { baseURL } from "../../../../utility/apiClient";
 import DynamicForm from "./DynamicForm";
+import {
+    navigateWithHighlight,
+  } from "../../../utility/navigationHighlight";
 
 const PutSingleProductReg = () => {
-  const { mutate, loading: mutationLoading } = useMutation();
+  const { mutate, loading: mutationLoading,error: mutationError } = useMutation();
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -124,7 +127,7 @@ const PutSingleProductReg = () => {
       spec_id: specOptions,
       certificate_id: (resultCertificate || []).map((item) => ({
         value: item.certificate_id,
-        label: `${item.aproval_code}`, // NOTE: kept typo from your code in case API matches this
+        label: `${item.compact_no}- ${item.formulation} - ${item.aproval_code}`, // NOTE: kept typo from your code in case API matches this
       })),
       sdpackaging_id: sdPackagingOptions,
       additional_form_id: (resultfoam || []).map((item) => ({
@@ -139,21 +142,29 @@ const PutSingleProductReg = () => {
 
   const handleCreate = async (payload) => {
     console.log("Submitting payload:", payload);
-    // try {
-    //   const result = await mutate({
-    //     url: `${baseURL}/app2/product-register/postSingle`, // NOTE: Ensure this matches the intended product-register endpoint
-    //     method: "POST",
-    //     data: [payload],
-    //   });
+    try {
+      const result = await mutate({
+        url: `${baseURL}/app2/product-register/putSingle`, // NOTE: Ensure this matches the intended product-register endpoint
+        method: "POST",
+        data: [payload],
+      });
 
-    //   if (result?.success) {
-    //      message.success(result?.data?.msg || "Create success");
-    //   } else {
-    //     message.error("Failed to create record");
-    //   }
-    // } catch (err) {
-    //   message.error("Network error occurred");
-    // }
+      if (result?.success) {
+         message.success(result?.data?.msg || "Create success");
+         setTimeout(() => {
+            navigateWithHighlight({
+              navigate,
+              path: "/app2/product-register/FG-Register",
+              ids: [id],
+              idField: "product_reg_id",
+            })
+        }, 2000); // 2 seconds
+      } else {
+        message.error(mutationError || "Create failed");
+      }
+    } catch (err) {
+      message.error("Network error occurred");
+    }
   };
 
   if (fetchLoading) return <div>Loading System Configuration...</div>;
@@ -172,7 +183,14 @@ const PutSingleProductReg = () => {
           onSubmit={handleCreate}
           submitText="Submit Registration"
           loading={mutationLoading}
-          onCancel={() => navigate(-1)}
+          onCancel={() =>
+            navigateWithHighlight({
+                navigate,
+                path: "/app2/product-register/FG-Register",
+                ids: [id],
+                idField: "product_reg_id",
+              })
+            }
         />
       ) : (
         <div>Loading form schema...</div>

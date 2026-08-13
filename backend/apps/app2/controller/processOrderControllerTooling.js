@@ -265,13 +265,13 @@ const postSingleprocess_order_tooling_Controller = async (req, res) => {
         await dbconnect.query('BEGIN');
 
         // 1. Check Duplicate
-        const checkDuplicate = await toolingService.checkDuplicate(header);
+        const checkDuplicate = await toolingService.checkDuplicate(header, {mat_id: detail_bom.mat_id});
         if (checkDuplicate.length > 0) {
             await dbconnect.query('ROLLBACK'); // [FIXED]: Added missing ROLLBACK
             return res.status(400).json({
                 success: false,
                 data: checkDuplicate[0],
-                msg: `รหัส MAT ROUTE: ${header.tooling_id}-${header.process_routing_order_id} มีในฐานข้อมูลอยู่แล้ว กรุณาลองรหัสใหม่!`
+                msg: `รหัส MAT ROUTE: ${header.tooling_id}-${header.process_routing_order_id}-${detail_bom.mat_id} มีในฐานข้อมูลอยู่แล้ว กรุณาลองรหัสใหม่!`
             });
         }
 

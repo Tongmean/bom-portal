@@ -13,6 +13,7 @@ router.get('/m_routingOrder', Controller.getOptionroutingOrderController);
 router.get('/m_headerSpeccomponent', Controller.getOptionheaderSpeccomponentController);
 router.get('/m_headerSpeccomponentOption', Controller.getOptionheaderSpeccomponentOptionController);
 router.get('/productRegoption', Controller.getOptionproductRegController);
+router.get('/displayoption', Controller.getOptiondisplayController);
 
 // getOptionheaderSpeccomponentController,
 // getOptionheaderSpeccomponentOptionController

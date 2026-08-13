@@ -183,7 +183,7 @@ import { baseURL } from "../../../../utility/apiClient";
 import DynamicForm from "./DynamicForm";
 
 const PostSingleProductReg = () => {
-  const { mutate, loading: mutationLoading } = useMutation();
+  const { mutate, loading: mutationLoading, error: mutationError } = useMutation();
   const navigate = useNavigate();
 
   const endpoints = useMemo(
@@ -203,7 +203,7 @@ const PostSingleProductReg = () => {
   // Initial values for POST. Note: detail_ColumnDefs is initialized with one empty object row.
   const postInitialValues = {
     mat_ColumnDefs: { status_check_id: 1 , revision: "REV. 00"},
-    header_ColumnDefs: { status_id: 1, pcs_per_set: 4 },
+    header_ColumnDefs: { status_id: 1, pcs_per_set: 4 , production_type: "liningBrake"},
     detail_ColumnDefs: [{}], // Starts the Form.List with 1 empty row
   };
 
@@ -296,7 +296,7 @@ const PostSingleProductReg = () => {
       spec_id: specOptions,
       certificate_id: (resultCertificate || []).map((item) => ({
         value: item.certificate_id,
-        label: `${item.aproval_code}`, // NOTE: kept typo from your code in case API matches this
+        label: `${item.compact_no}- ${item.formulation} - ${item.aproval_code}`, // NOTE: kept typo from your code in case API matches this
       })),
       sdpackaging_id: sdPackagingOptions,
       additional_form_id: (resultfoam || []).map((item) => ({
@@ -321,7 +321,7 @@ const PostSingleProductReg = () => {
       if (result?.success) {
          message.success(result?.data?.msg || "Create success");
       } else {
-        message.error("Failed to create record");
+        message.error(mutationError || "Create failed");
       }
     } catch (err) {
       message.error("Network error occurred");

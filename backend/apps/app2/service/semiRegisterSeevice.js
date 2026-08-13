@@ -73,6 +73,16 @@ const getSingle = async (payload) => {
         const result = await dbconnect.query(mysql, [payload]);
         return result.rows
 }
+const getSinglebyfg = async (payload) => {
+        const mysql =`
+        SELECT * FROM "blCpi".bom_detail 
+        WHERE parrent_mat_id = $1
+
+
+        `
+        const result = await dbconnect.query(mysql, [payload]);
+        return result.rows
+}
 
 const checkDuplicate = async (payload) => {
     // console.log("payload", payload)
@@ -136,6 +146,7 @@ module.exports = {
     deleteBomdetail,
     putBomdetail,
     getSingle,
-    checkDuplicate
+    checkDuplicate,
+    getSinglebyfg
 
 };

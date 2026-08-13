@@ -69,13 +69,22 @@ const getSingleprocessRoutingtooling = async (payload) => {
         const result = await dbconnect.query(mysql, [payload]);
         return result.rows
 }
-const checkDuplicate = async (payload) => {
+const checkDuplicate = async (payload, {mat_id}) => {
         const mysql =`    
-                SELECT * FROM "blCpi".process_routing_order_tooling
-                WHERE process_routing_order_id = $1
-                AND tooling_id = $2     
+                SELECT * 
+                FROM "blCpi".process_routing_order_tooling tooling
+                LEFT JOIN "blCpi".process_routing_order_tooling_bom tooling_bom
+                ON tooling.process_routing_tooling_id = tooling_bom.process_routing_tooling_id
+                WHERE tooling.process_routing_order_id = $1
+                AND tooling.tooling_id = $2
+                AND tooling_bom.mat_id = $3
         `
-        const result = await dbconnect.query(mysql, [payload.process_routing_order_id, payload.tooling_id]);
+        // const mysql =`    
+        //         SELECT * FROM "blCpi".process_routing_order_tooling
+        //         WHERE process_routing_order_id = $1
+        //         AND tooling_id = $2     
+        // `
+        const result = await dbconnect.query(mysql, [payload.process_routing_order_id, payload.tooling_id, mat_id]);
         return result.rows
 }
 

@@ -133,6 +133,74 @@ const getOptionfoam = async () => {
     const result = await dbconnect.query(mysql);
     return result.rows
 }
+const getOptiondisplay = async () => {
+    const mysql =`
+            SELECT 
+            reg.product_reg_id,
+            reg.production_type,
+            fg_mat.erp AS FG_ERP, 
+            fg_mat.name AS FG_name,
+            reg.production_code, 
+
+
+            reg.part_no, 
+            drawing.compact_no AS drawing_no,
+            semi_fg_mat.erp AS semi_fg_erp, 
+            semi_fg_mat.name AS semi_fg_name,
+            reg.pcs_per_set,
+            spec.spec_code AS product_spec_code,
+            spec.sale_code,
+            spec.formulation,
+            cus.country,
+            entity.name AS customer_name,
+            sdpackage.sdpackaing_code, -- (Check for spelling in DB)
+            foam.part_no AS foam_part_no, -- Added Alias to prevent collision
+            cer.aproval_code,          -- (Check for spelling in DB)
+            status.label AS status,
+            reg.remark,
+            fg_mat.revision,
+            sc.label AS status_check
+            
+        FROM "blCpi".product_reg reg
+
+        LEFT JOIN "blCpi".m_mat fg_mat
+            ON reg.fg_mat_id = fg_mat.mat_id
+            
+        LEFT JOIN "blCpi".drawing_header drawing
+            ON reg.drawing_id = drawing.drawing_header_id
+            
+        -- spec_header JOIN removed because it is unused
+            
+        LEFT JOIN "blCpi".m_mat semi_fg_mat
+            ON reg.semi_mat_id = semi_fg_mat.mat_id
+            
+        LEFT JOIN "blCpi".sdpackaging_header sdpackage
+            ON reg.sdpackaging_id = sdpackage.sdpackaging_header_id
+            
+        LEFT JOIN "blCpi".foam_header foam
+            ON reg.additional_form_id = foam.foam_header_id -- (Check form vs foam)
+
+        LEFT JOIN "blCpi".certificate cer
+            ON reg.certificate_id = cer.certificate_id
+
+        LEFT JOIN "blCpi".m_status status
+            ON reg.status_id = status.status_id
+            
+        LEFT JOIN "blCpi".m_status_check sc
+            ON sc.status_check_id = fg_mat.status_check_id
+        LEFT JOIN "blCpi".spec_header spec
+            ON spec.spec_header_id = reg.spec_id 
+        LEFT JOIN "blCpi".m_customer cus
+            ON cus.customer_id = spec.customer_id
+        LEFT JOIN "blCpi".m_entity entity
+            ON entity.entity_id = cus.entity_id
+
+            
+        ORDER BY reg.product_reg_id DESC
+        `
+    const result = await dbconnect.query(mysql);
+    return result.rows
+}
 
 module.exports = {
     getAllm_channel,
@@ -150,7 +218,8 @@ module.exports = {
     getOptionsdpackage,
     getOptioncertificate,
     getOptionproduct_reg_item_option,
-    getOptionfoam
+    getOptionfoam,
+    getOptiondisplay
 
 
 
