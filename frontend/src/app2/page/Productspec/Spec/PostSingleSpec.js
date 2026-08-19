@@ -97,7 +97,7 @@ const PostSinglespec = () => {
       });
       if (result.success) {
         message.success(result.data?.msg || "Specification created successfully");
-        navigate(-1); // Redirect back on success
+        // navigate(-1); // Redirect back on success
       } else {
         message.error(mutationError || "An error occurred while saving.");
       }

@@ -202,7 +202,7 @@ const PostSingleProductReg = () => {
 
   // Initial values for POST. Note: detail_ColumnDefs is initialized with one empty object row.
   const postInitialValues = {
-    mat_ColumnDefs: { status_check_id: 1 , revision: "REV. 00"},
+    mat_ColumnDefs: { status_check_id: Number(1) , revision: "REV. 00"},
     header_ColumnDefs: { status_id: 1, pcs_per_set: 4 , production_type: "liningBrake"},
     detail_ColumnDefs: [{}], // Starts the Form.List with 1 empty row
   };

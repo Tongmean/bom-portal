@@ -46,7 +46,7 @@ export default function App2Layout() {
           label: <Link to="display/flat">flat Bom</Link>,
         },
         {
-          key: "Display-1",
+          key: "Display-2",
           label: <Link to="display/layer">layer Bom</Link>,
         },
        

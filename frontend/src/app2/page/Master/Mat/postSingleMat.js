@@ -126,7 +126,7 @@ const PostSinglemat = () => {
 
       if (result?.success) {
         message.success(result?.data?.msg || "Create success");
-        navigate(-1);
+        // navigate(-1);
       } else {
         message.error(result?.data?.msg || mutationError || "Create failed");
       }

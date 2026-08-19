@@ -60,11 +60,13 @@ const getAlllayer0 = async (payload) => {
             ON reg.additional_form_id  = detail.foam_header_id
         LEFT JOIN "blCpi".m_mat detail_mat
             ON detail_mat.mat_id = detail.mat_id
+        WHERE reg.production_code = $1
+            AND detail_mat.erp IS NOT NULL
         ORDER BY reg.product_reg_id DESC;
 
         `
         const resultFoam = await dbconnect.query(mysqlFoam, [payload]);
-        return [resultSd.rows, resultSpec.rows, resultFoam.rows];
+        return [...resultSd.rows, ...resultSpec.rows, ...resultFoam.rows];
 }
 const getAllbomtree = async (payload) => {
     const mysql =`
@@ -95,7 +97,7 @@ const getAllbomtree = async (payload) => {
                 child_name,
                 quantity,
                 priority,
-                0 AS level,
+                1 AS level,
                 quantity AS total_qty,
                 parent AS semi_fg,
                 -- Cast as TEXT to prevent length mismatch errors in the recursive step
@@ -132,9 +134,10 @@ const getAllbomtree = async (payload) => {
             bom_detail_id DESC
 
     `
-    const result = await dbconnect.query(mysql, [payload.compact_no, payload.formulation, payload.revision]);
+    const result = await dbconnect.query(mysql, [payload]);
     return result.rows
 }
+
 const getAllbomtreeHp = async (payload) => {
     const mysql =`
     WITH RECURSIVE bom AS (
@@ -203,7 +206,7 @@ const getAllbomtreeHp = async (payload) => {
         path,
         bom_detail_id DESC;
     `
-    const result = await dbconnect.query(mysql, [payload.compact_no, payload.formulation, payload.revision]);
+    const result = await dbconnect.query(mysql, [payload]);
     return result.rows
 }
 

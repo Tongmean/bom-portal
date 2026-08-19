@@ -29,14 +29,14 @@ const PutSingleProductReg = () => {
   );
 
   const { data: fetchResult, loading: fetchLoading, error } = useFetchMultiple(endpoints);
-//   console.log("fetchResult", fetchResult);
+  console.log("fetchResult", fetchResult);
 
-  // Initial values for POST. Note: detail_ColumnDefs is initialized with one empty object row.
-  const postInitialValues = {
-    mat_ColumnDefs: { status_check_id: 1 , revision: "REV. 00"},
-    header_ColumnDefs: { status_id: 1, pcs_per_set: 4 },
-    detail_ColumnDefs: [{}], // Starts the Form.List with 1 empty row
-  };
+  // // Initial values for POST. Note: detail_ColumnDefs is initialized with one empty object row.
+  // const postInitialValues = {
+  //   mat_ColumnDefs: { status_check_id: 1 , revision: "REV. 00"},
+  //   header_ColumnDefs: { status_id: 1, pcs_per_set: 4 },
+  //   detail_ColumnDefs: [{}], // Starts the Form.List with 1 empty row
+  // };
 
   // Safely extract schema
   const columnDefsObj = fetchResult?.productRegister?.columnDefs || {};

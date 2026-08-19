@@ -1,4 +1,6 @@
 const dbconnect = require('../../../Middleware/Dbconnect');
+
+
 const getAllprodutReg= async () => {
         const mysql =`
         SELECT 

@@ -111,7 +111,7 @@ const PutSinglespec = () => {
         message.success(result.data?.msg || "Specification updated successfully");
         navigateWithHighlight({
           navigate,
-          path: "/app2/product-spec/Customer",
+          path: "/app2/product-spec/product-spec",
           ids: [id],
           idField: "spec_header_id",
         });
@@ -168,7 +168,7 @@ const PutSinglespec = () => {
           onBack={() =>
             navigateWithHighlight({
               navigate,
-              path: "/app2/product-spec/Customer",
+              path: "/app2/product-spec/product-spec",
               ids: [id], // Assuming spec_header_id is the unique identifier
               idField: "spec_header_id",
             })

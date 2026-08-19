@@ -20,7 +20,7 @@ const CreateSemiFG = () => {
   const m_mat_data = fetchResult?.m_mat?.data || [];
 
   const optionsMap = useMemo(() => {
-    const matOptions = m_mat_data
+    const matOptionsPatent = m_mat_data
       .filter((item) => {
         // Ensure item.component exists, then check if it contains WIP, SEMI, or FG
         return item.component && /WIP|SEMI|FG/i.test(item.component);
@@ -29,13 +29,23 @@ const CreateSemiFG = () => {
         value: item.mat_id,
         label: `${item.erp} - ${item.component}`,
       }));
+    const matOptionschild = m_mat_data
+      .filter((item) => {
+        // Ensure item.component exists, then check if it contains WIP, SEMI, or FG
+        return item.component && /WIP|SEMI|FG|รีเวท/i.test(item.component);
+      })
+      .map((item) => ({
+        value: item.mat_id,
+        label: `${item.erp} - ${item.component} -${item.name}`,
+      }));
 
     return {
-      parrent_mat_id: matOptions,
-      child_mat_id: matOptions,
+      parrent_mat_id: matOptionsPatent,
+      child_mat_id: matOptionschild,
     };
   }, [m_mat_data]);
-
+  // console.log("optionsMap", optionsMap);
+  // console.log("m_mat_data", m_mat_data);
   const handleCreate = async (payloadArray) => {
     console.log("Submitting payload:", payloadArray);
     try {

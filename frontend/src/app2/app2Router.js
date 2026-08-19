@@ -40,6 +40,8 @@ import PutSinglespec from "./page/Productspec/Spec/PutSinglespec";
 import ProductReg from "./page/ProductRegister/FgRegister/ProductReg";
 import PostSingleProductReg from "./page/ProductRegister/FgRegister/PostSingleProductReg";
 import PutSingleProductReg from "./page/ProductRegister/FgRegister/PutSingleProductReg";
+import LayerBomDisplay from "./page/Display/Layer/LayerBomDisplay";
+import FlatBomDisplay from "./page/Display/Flat/FlatBomDisplay";
 export const app2Routes = [
   {
     path: "/app2",
@@ -261,6 +263,18 @@ export const app2Routes = [
         path: "product-register/FG-Register/putSingle/:id",
         element: (
           < PutSingleProductReg/>
+        )
+      },
+      {
+        path: "display/layer",
+        element: (
+          < LayerBomDisplay/>
+        )
+      },
+      {
+        path: "display/flat",
+        element: (
+          < FlatBomDisplay/>
         )
       },
     ]

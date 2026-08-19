@@ -88,16 +88,28 @@ const EditSemiFG = () => {
 
   // Filter materials (WIP, SEMI, FG) mapping
   const optionsMap = useMemo(() => {
-    const matOptions = m_mat_data
-      .filter((item) => item.component && /WIP|SEMI|FG/i.test(item.component))
+    const matOptionsPatent = m_mat_data
+      .filter((item) => {
+        // Ensure item.component exists, then check if it contains WIP, SEMI, or FG
+        return item.component && /WIP|SEMI|FG/i.test(item.component);
+      })
+      .map((item) => ({
+        value: item.mat_id,
+        label: `${item.erp} - ${item.component} -${item.name}`,
+      }));
+    const matOptionschild = m_mat_data
+      .filter((item) => {
+        // Ensure item.component exists, then check if it contains WIP, SEMI, or FG
+        return item.component && /WIP|SEMI|FG|รีเวท/i.test(item.component);
+      })
       .map((item) => ({
         value: item.mat_id,
         label: `${item.erp} - ${item.component}`,
       }));
 
     return {
-      parrent_mat_id: matOptions,
-      child_mat_id: matOptions,
+      parrent_mat_id: matOptionsPatent,
+      child_mat_id: matOptionschild,
     };
   }, [m_mat_data]);
 

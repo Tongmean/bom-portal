@@ -52,7 +52,7 @@ const EngineeringpartDetail = (props) => {
     // console.log("gridApi", (gridApi));    
     const finalColumnDefs = useMemo(() => {
         const cols = [...columnDefs]; // copy ก่อน ไม่แก้ของเดิม
-        cols[0] = { ...cols[0], checkboxSelection: true, headerName: "No" };
+        cols[0] = { ...cols[0], checkboxSelection: true,headerCheckboxSelection: true, headerName: "No" };
         // cols[1] = { ...cols[1], headerName: "Com" };
         cols.push({
             headerName: 'Actions',

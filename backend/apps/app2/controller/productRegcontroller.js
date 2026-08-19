@@ -49,7 +49,10 @@ const getSingleproductRegController = async (req, res) => {
         const headerResult = await Service.getSingleprodutReg(id);
         const detailResult = await Service.getSingleprodutRegitembyregid(id);
         const matResult = await matService.getSinglemat(18);
-        const initailmatResult = await matService.getSinglemat(headerResult[0].fg_mat_id);
+        const initailmatResult = (await matService.getSinglemat(headerResult[0].fg_mat_id)).map(i=>({
+            ...i,
+            status_check_id: Number(i.status_check_id)
+        }));
         const mat_ColumnDefs = (() => {
             const source = matResult || [];
             const cols = [...createColumnDefs(source)];
@@ -268,8 +271,8 @@ const postSingleheaderController = async (req, res) => {
         // 3. Map Production Type to Material Category
         const productionTypeToMatCat = {
             'LiningBrake': 'FG-Brake-Lining',
-            'shoesBrake': 'FG-Brake-Shoes',
-            'discBrake': 'FG-Brake-Disc'
+            'DiscBrake': 'FG-Brake-Shoes',
+            'DiscBrake': 'FG-Brake-Disc'
         };
 
         const targetMatCat = productionTypeToMatCat[header.production_type];
@@ -374,8 +377,8 @@ const putSingleheaderController = async (req, res) => {
             // Map the production types to their corresponding material categories
             const productionTypeToMatCat = {
                 'LiningBrake': 'FG-Brake-Lining',
-                'shoesBrake': 'FG-Brake-Shoes',
-                'discBrake': 'FG-Brake-Disc'
+                'ShoesBrake': 'FG-Brake-Shoes',
+                'DiscBrake': 'FG-Brake-Disc'
             };
 
             // Look up the category based on the incoming production_type
